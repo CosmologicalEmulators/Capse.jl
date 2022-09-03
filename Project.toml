@@ -1,0 +1,7 @@
+name = "Capse"
+uuid = "994f66c3-d2c7-4ba6-88fb-4a10f50800ba"
+authors = ["marcobonici <bonici.marco@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+SimpleChains = "de6bee2f-e2f4-4ec7-b6ed-219cc6f6e9e5"

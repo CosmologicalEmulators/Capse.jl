@@ -45,7 +45,7 @@ function run_emulator(input, trained_emulator::SimpleChainsEmulator)
     return trained_emulator.Architecture(input, trained_emulator.Weights)
 end
 
-function load_emu(path)
+function load_emulators(path)
     loaded = BSON.load(path)
     
     Cltt = loaded[:CℓTT]
@@ -55,7 +55,5 @@ function load_emu(path)
     return Cltt, Clee, Clte
     
 end
-
-function_to_call_from_python(input, p, mlpd) = mlpd(deepcopy(input), p)
 
 end # module

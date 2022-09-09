@@ -56,6 +56,6 @@ function load_emu(path)
     
 end
 
-function_to_call_from_python(input, p, mlpd) = mlpd(copy(input), p)
+function_to_call_from_python(input, p, mlpd) = mlpd(deepcopy(input), p)
 
 end # module

@@ -2,6 +2,7 @@ module Capse
 
 using Base: @kwdef
 using SimpleChains
+using BSON
 
 function maximin_input!(x, in_MinMax)
     for i in 1:length(x)
@@ -44,5 +45,15 @@ function run_emulator(input, trained_emulator::SimpleChainsEmulator)
     return trained_emulator.Architecture(input, trained_emulator.Weights)
 end
 
+function load_emu(path)
+    loaded = BSON.load(path)
+    
+    Cltt = loaded[:CℓTT]
+    Clee = loaded[:CℓEE]
+    Clte = loaded[:CℓTE]
+    
+    return Cltt, Clee, Clte
+    
+end
 
 end # module

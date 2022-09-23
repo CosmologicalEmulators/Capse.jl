@@ -47,13 +47,14 @@ end
 
 function load_emulators(path)
     loaded = BSON.load(path)
-    
+
     Cltt = loaded[:CℓTT]
     Clee = loaded[:CℓEE]
     Clte = loaded[:CℓTE]
-    
-    return Cltt, Clee, Clte
-    
+    Clpp = loaded[:CℓPP]
+
+    return Cltt, Clee, Clte, Clpp
+
 end
 
 end # module

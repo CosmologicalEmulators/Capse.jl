@@ -20,4 +20,8 @@ function get_Cℓ(input_params, CℓEmulator::AbstractCℓEmulators)
     return output .* exp(input_params[1]-3.)
 end
 
+function get_ℓgrid(CℓEmulator::AbstractCℓEmulators)
+    return CℓEmulator.ℓgrid
+end
+
 end # module

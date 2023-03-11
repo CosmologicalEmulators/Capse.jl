@@ -5,7 +5,7 @@ using AbstractEmulator
 
 abstract type AbstractCℓEmulators end
 
-@kwdef mutable struct CℓEmulators <: AbstractCℓEmulators
+@kwdef mutable struct CℓEmulator <: AbstractCℓEmulators
     TrainedEmulator::AbstractTrainedEmulators
     ℓgrid::Array
     InMinMax::Matrix

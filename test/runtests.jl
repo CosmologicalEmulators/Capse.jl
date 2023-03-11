@@ -25,4 +25,5 @@ capse_emu = Capse.CℓEmulator(TrainedEmulator = emu, ℓgrid=ℓ_test, InMinMax
     output = Capse.get_Cℓ(cosmo,  capse_emu)
     output_vec = Capse.get_Cℓ(cosmo_vec, capse_emu)
     @test isapprox(output_vec[:,1], output)
+    @test ℓ_test == Capse.get_ℓgrid(capse_emu)
 end

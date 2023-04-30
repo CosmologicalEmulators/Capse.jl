@@ -6,4 +6,6 @@ version = "0.1.0"
 [deps]
 AbstractEmulator = "0dc76ace-04b2-4bd9-b691-6d8501953659"
 BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
+FastChebInterp = "cf66c380-9a80-432c-aff8-4f9c79c0bdde"
+LoopVectorization = "bdcacae8-1622-11e9-2a5c-532679323890"
 SimpleChains = "de6bee2f-e2f4-4ec7-b6ed-219cc6f6e9e5"

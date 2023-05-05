@@ -17,16 +17,16 @@ abstract type AbstractCℓEmulators end
 end
 #TODO: consider an SMatrix for polygrid
 
-function get_Cℓ(input_params, Cℓemu::CℓEmulator)
+function get_Cℓ(input_params::Array{T}, Cℓemu::CℓEmulator) where {T}
     chebcoefs = get_chebcoefs(input_params, Cℓemu)
-    Cls = zeros(length(Cℓemu.ℓgrid))
+    Cls = zeros(T, length(Cℓemu.ℓgrid))
     matvecmul!(Cls, Cℓemu.PolyGrid, chebcoefs)
 
-    return Cls .* exp(input_params[1]-3.)
+    return Cls
 end
 
-function matvecmul!(C::Vector, A::Matrix, B::Vector)
-    @turbo for m ∈ axes(A,1)
+function matvecmul!(C::Array{T}, A::Matrix, B::Array) where {T}
+    for m ∈ axes(A,1)
         Cm = zero(eltype(B))
         for k ∈ axes(A,2)
             Cm += A[m,k] * B[k]
@@ -40,7 +40,7 @@ function get_chebcoefs(input_params, Cℓemu::CℓEmulator)
     maximin_input!(input, Cℓemu.InMinMax)
     chebcoefs = Vector(run_emulator(input, Cℓemu.TrainedEmulator))
     inv_maximin_output!(chebcoefs, Cℓemu.OutMinMax)
-    return chebcoefs
+    return chebcoefs .* exp(input_params[1]-3.)
 end
 
 function get_ℓgrid(Cℓemu::CℓEmulator)

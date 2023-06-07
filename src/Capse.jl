@@ -19,10 +19,10 @@ end
 
 function get_Cℓ(input_params::Array{T}, Cℓemu::CℓEmulator) where {T}
     chebcoefs = get_chebcoefs(input_params, Cℓemu)
-    Cls = zeros(T, length(Cℓemu.ℓgrid))
-    matvecmul!(Cls, Cℓemu.PolyGrid, chebcoefs)
-    return Cls
-    #return Cℓemu.PolyGrid * chebcoefs
+    #Cls = zeros(T, length(Cℓemu.ℓgrid))
+    #matvecmul!(Cls, Cℓemu.PolyGrid, chebcoefs)
+    #return Cls
+    return Cℓemu.PolyGrid * chebcoefs
 end
 
 #function matvecmul!(C::Array{T}, A::Matrix, B::Array) where {T}

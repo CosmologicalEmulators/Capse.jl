@@ -3,7 +3,7 @@ module Capse
 using Base: @kwdef
 using AbstractEmulator
 using FastChebInterp
-using LoopVectorization #investigate wether it is better to use Tullio
+#using LoopVectorization #investigate wether it is better to use Tullio
 
 abstract type AbstractCℓEmulators end
 
@@ -21,19 +21,19 @@ function get_Cℓ(input_params::Array{T}, Cℓemu::CℓEmulator) where {T}
     chebcoefs = get_chebcoefs(input_params, Cℓemu)
     Cls = zeros(T, length(Cℓemu.ℓgrid))
     matvecmul!(Cls, Cℓemu.PolyGrid, chebcoefs)
-
     return Cls
+    #return Cℓemu.PolyGrid * chebcoefs
 end
 
-function matvecmul!(C::Array{T}, A::Matrix, B::Array) where {T}
-    for m ∈ axes(A,1)
-        Cm = zero(eltype(B))
-        for k ∈ axes(A,2)
-            Cm += A[m,k] * B[k]
-        end
-        C[m] = Cm
-    end
-end
+#function matvecmul!(C::Array{T}, A::Matrix, B::Array) where {T}
+#    @turbo for m ∈ axes(A,1)
+#        Cm = zero(eltype(B))
+#        for k ∈ axes(A,2)
+#            Cm += A[m,k] * B[k]
+#        end
+#        C[m] = Cm
+#    end
+#end
 
 function get_chebcoefs(input_params, Cℓemu::CℓEmulator)
     input = deepcopy(input_params)

@@ -1,0 +1,5 @@
+[deps]
+AbstractEmulator = "0dc76ace-04b2-4bd9-b691-6d8501953659"
+SimpleChains = "de6bee2f-e2f4-4ec7-b6ed-219cc6f6e9e5"
+Static = "aedffcd0-7271-4cad-89d0-dc628f76c6d3"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

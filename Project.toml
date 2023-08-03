@@ -10,3 +10,4 @@ SimpleChains = "de6bee2f-e2f4-4ec7-b6ed-219cc6f6e9e5"
 
 [compat]
 BSON = "0.3"
+SimpleChains = "0.4"

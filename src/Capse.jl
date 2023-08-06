@@ -1,7 +1,7 @@
 module Capse
 
 using Base: @kwdef
-using AbstractEmulator
+using AbstractCosmologicalEmulators
 
 abstract type AbstractCℓEmulators end
 

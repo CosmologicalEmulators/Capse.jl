@@ -4,10 +4,4 @@ authors = ["marcobonici <bonici.marco@gmail.com>"]
 version = "0.1.0"
 
 [deps]
-AbstractEmulator = "0dc76ace-04b2-4bd9-b691-6d8501953659"
-BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
-SimpleChains = "de6bee2f-e2f4-4ec7-b6ed-219cc6f6e9e5"
-
-[compat]
-BSON = "0.3"
-SimpleChains = "0.4"
+AbstractCosmologicalEmulators = "c83c1981-e5c4-4837-9eb8-c9b1572acfc6"

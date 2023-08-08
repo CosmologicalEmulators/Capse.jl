@@ -13,8 +13,7 @@ abstract type AbstractCℓEmulators end
 
 - ℓgrid::Array, the ``\\ell``-grid the emulator has been trained on.
 
-- InMinMax::Matrix, the `Matrix` containing the numbers to perform the MinMax normalization
-of the input features
+- InMinMax::Matrix, the `Matrix` containing the numbers to perform the MinMax normalization of the input features
 
 - OutMinMax::Matrix, the `Matrix` containing the numbers to perform the MinMax normalization
 of the input features

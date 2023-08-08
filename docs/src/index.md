@@ -25,8 +25,13 @@ After loading a trained `CℓTE_emu`, feed it some input parameters `x`.
 
 ```julia
 import Capse
-Capse.get_Cℓ(x, CℓTE_emu) #compute the TT angular spectru,
+x = rand(6) # generate some random input
+Capse.get_Cℓ(x, CℓTE_emu) #compute the TT angular spectrum
 ```
+
+!!! warning
+
+    in this moment the API is **not** stable: we need to pass the input cosmological parameters in an hardcoded way. We are working to add a more stable and flexible API.
 
 This computation is quite fast: a benchmark performed locally, with a 12th Gen Intel® Core™ i7-1260P, gives the following result
 

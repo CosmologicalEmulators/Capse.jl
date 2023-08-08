@@ -15,29 +15,31 @@ benchmark = BenchmarkTools.load("./assets/capse_benchmark.json")
 In order to install  `Capse.jl`, run on the `Julia` REPL
 
 ```julia
-using Pkg, Pkg.add(url="https://github.com/CosmologicalEmulators/AbstractEmulator.jl")
+using Pkg, Pkg.add(url="https://github.com/CosmologicalEmulators/Capse.jl")
 ```
 
 ## Usage
 
 In order to use `Capse.jl` you need a trained emulator (some of them can be found on [Zenodo](https://zenodo.org/record/8187935)).
-After loading a trained `CℓTE_emu`, feed it some input parameters `x`.
+After loading a trained `CℓTT_emu`, feed it some input parameters `x`.
 
 ```julia
 import Capse
 x = rand(6) # generate some random input
-Capse.get_Cℓ(x, CℓTE_emu) #compute the TT angular spectrum
+Capse.get_Cℓ(x, CℓTT_emu) #compute the TT angular spectrum
 ```
 
 !!! warning
 
-    in this moment the API is **not** stable: we need to pass the input cosmological parameters in an hardcoded way. We are working to add a more stable and flexible API.
+    In this moment the API is **not** stable: we need to pass the input cosmological parameters in an hardcoded way. We are working to add a more stable and flexible API.
 
 This computation is quite fast: a benchmark performed locally, with a 12th Gen Intel® Core™ i7-1260P, gives the following result
 
 ```@example tutorial
 benchmark[1]["Capse"]["Cl"] # hide
 ```
+
+Considering that a high-precision settings calculation performed with [`CAMB`](https://github.com/cmbant/CAMB) on the same machine requires around 60 seconds, `Capse.jl` is around ``1,000,000`` times faster.
 
 ### Authors
 

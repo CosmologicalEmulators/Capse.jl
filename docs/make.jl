@@ -6,7 +6,7 @@ ENV["GKSwstype"] = "100"
 push!(LOAD_PATH,"../src/")
 
 makedocs(
-    modules = [Effort],
+    modules = [Capse],
     format = Documenter.HTML(prettyurls = get(ENV, "CI", nothing) == "true",
     sidebar_sitename=true),
     sitename = "Capse.jl",

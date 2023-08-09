@@ -13,10 +13,9 @@ abstract type AbstractCℓEmulators end
 
 - ℓgrid::Array, the ``\\ell``-grid the emulator has been trained on.
 
-- InMinMax::Matrix, the `Matrix` containing the numbers to perform the MinMax normalization of the input features
+- InMinMax::Matrix, the `Matrix` used for the MinMax normalization of the input features
 
-- OutMinMax::Matrix, the `Matrix` containing the numbers to perform the MinMax normalization
-of the input features
+- OutMinMax::Matrix, the `Matrix` used for the MinMax normalization of the output features
 """
 @kwdef mutable struct CℓEmulator <: AbstractCℓEmulators
     TrainedEmulator::AbstractTrainedEmulators
@@ -27,7 +26,7 @@ end
 
 """
     get_Cℓ(CℓEmulator::AbstractCℓEmulators)
-Compute the ``C_\ell``on the ``\\ell``-grid the emulator has been trained on.
+Compute and retrieve the ``C_\ell``on the ``\\ell``-grid the emulator has been trained on.
 """
 function get_Cℓ(input_params, CℓEmulator::AbstractCℓEmulators)
     input = deepcopy(input_params)

@@ -33,11 +33,26 @@ Capse.get_Cℓ(x, CℓTT_emu) #compute the TT angular spectrum
 
     In this moment the API is **not** stable: we need to pass the input cosmological parameters in an hardcoded way. We are working to add a more stable and flexible API.
 
-This computation is quite fast: a benchmark performed locally, with a 12th Gen Intel® Core™ i7-1260P, gives the following result
+In this moment we support two different Neural Networks backend:
+
+- [SimpleChains](https://github.com/PumasAI/SimpleChains.jl), which is taylored for small NN running on a CPU
+- [Lux](https://github.com/LuxDL/Lux.jl), which can run on the GPU
+
+Using the former, we obtain a mean execution time of 45 microseconds
 
 ```@example tutorial
-benchmark[1]["Capse"]["Cl"] # hide
+benchmark[1]["Capse"]["SimpleChains"] # hide
 ```
+
+Using the latter, with the same architecture and weights, we obtain
+
+```@example tutorial
+benchmark[1]["Capse"]["Lux"] # hide
+```
+
+SimpleChains is about 2 times faster than Lux (altough giving the same result up to floating point precision).
+
+This benchmarks have been performed locally, with a 12th Gen Intel® Core™ i7-1260P.
 
 Considering that a high-precision settings calculation performed with [`CAMB`](https://github.com/cmbant/CAMB) on the same machine requires around 60 seconds, `Capse.jl` is around ``1,000,000`` times faster.
 

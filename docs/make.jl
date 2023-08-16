@@ -12,7 +12,8 @@ makedocs(
     sitename = "Capse.jl",
     authors  = "Marco Bonici",
     pages = [
-        "Home" => "index.md"
+        "Home" => "index.md",
+        "API" => "api.md"
     ]
 )
 

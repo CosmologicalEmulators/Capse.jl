@@ -2,6 +2,7 @@ module Capse
 
 using Base: @kwdef
 using AbstractCosmologicalEmulators
+import AbstractCosmologicalEmulators.get_emulator_description
 
 abstract type AbstractCℓEmulators end
 
@@ -45,6 +46,10 @@ Returns the ``\\ell``-grid the emulator has been trained on.
 """
 function get_ℓgrid(CℓEmulator::AbstractCℓEmulators)
     return CℓEmulator.ℓgrid
+end
+
+function get_emulator_description(Clemu::AbstractCℓEmulators)
+    get_emulator_description(Clemu.TrainedEmulator)
 end
 
 end # module

@@ -6,8 +6,11 @@ using AbstractCosmologicalEmulators
 abstract type AbstractCℓEmulators end
 
 """
-    w0waCDMCosmology(TrainedEmulator::AbstractTrainedEmulators, ℓgrid::Array,
+    CℓEmulator(TrainedEmulator::AbstractTrainedEmulators, ℓgrid::Array,
     InMinMax::Matrix, OutMinMax::Matrix)
+
+This is the fundamental struct used to obtain the ``C_\\ell``'s from an emulator.
+It contains:
 
 - TrainedEmulator::AbstractTrainedEmulators, the trained emulator
 
@@ -26,7 +29,7 @@ end
 
 """
     get_Cℓ(CℓEmulator::AbstractCℓEmulators)
-Compute and retrieve the ``C_\ell``on the ``\\ell``-grid the emulator has been trained on.
+Computes and returns the ``C_\\ell``on the ``\\ell``-grid the emulator has been trained on.
 """
 function get_Cℓ(input_params, CℓEmulator::AbstractCℓEmulators)
     input = deepcopy(input_params)
@@ -38,7 +41,7 @@ end
 
 """
     get_ℓgrid(CℓEmulator::AbstractCℓEmulators)
-Return the ``\\ell``-grid the emulator has been trained on.
+Returns the ``\\ell``-grid the emulator has been trained on.
 """
 function get_ℓgrid(CℓEmulator::AbstractCℓEmulators)
     return CℓEmulator.ℓgrid

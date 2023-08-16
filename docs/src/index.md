@@ -5,9 +5,11 @@ using Plots; gr()
 Plots.reset_defaults()
 using JSON
 using BenchmarkTools
+using Capse
 default(palette = palette(:tab10))
 benchmark = BenchmarkTools.load("./assets/capse_benchmark.json")
 path_json = "./assets/nn_setup.json"
+weights = rand(20000)
 ```
 
 `Capse.jl` is a Julia package designed to emulate the computation of the CMB Angular Power Spectrum, with a speedup of several orders of magnitude.
@@ -29,7 +31,7 @@ First of all, instantiate a neural network with its weights and biases. This is 
 At the given link above, you can find a `JSON` file with the aforementioned NN architecture. This can be read using the `JSON` library in the following way
 
 ```@example tutorial
-NN_dict = JSON.parsefile("path_json)
+NN_dict = JSON.parsefile(path_json);
 ```
 
 This file contains all the informations required to correctly instantiate the neural network.
@@ -42,28 +44,32 @@ After this, you just have to pass the `NN_dict` and the `weights` array to the `
 In order to instantiate the emulator, just run
 
 ```julia
-import Capse
 trained_emu = Capse.init_emulator(NN_dict, weights, Capse.SimpleChainsEmulator)
 ```
+
 `SimpleChains.jl` is faster expecially for small NN on the CPU. If you prefer to use `Lux.jl`, pass as last argument `Capse.LuxEmulator`.
+
+Each trained emulator should be shipped with a description within the JSON file. In order to print the description, just runs:
+
+```@example tutorial
+Capse.get_emulator_description(NN_dict["emulator_description"])
+```
 
 After instantiating the NN, we need:
 
-- the ``\ell`-grid used to train the emulator, `ℓgrid`
+- the ``\ell``-grid used to train the emulator, `ℓgrid`
 - the arrays used to perform the minmax normalization of both input and output features, `InMinMax_array` and `OutMinMax_array`
 
 Now you can instantiate the emulator, using
 
 ```julia
 Cℓ_emu = Capse.CℓEmulator(TrainedEmulator = trained_emu, ℓgrid = ℓgrid,
-                             InMinMax = InMinMax_array,
-                             OutMinMax = OutMinMax_array)
+                          InMinMax = InMinMax_array, OutMinMax = OutMinMax_array)
 ```
 
 After loading a trained `CℓTT_emu`, feed it some input parameters `x`.
 
 ```julia
-import Capse
 x = rand(6) # generate some random input
 Capse.get_Cℓ(x, Cℓ_emu) #compute the Cℓ's
 ```

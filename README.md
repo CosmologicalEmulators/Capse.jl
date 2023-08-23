@@ -9,7 +9,9 @@
 ![size](https://img.shields.io/github/repo-size/CosmologicalEmulators/Capse.jl)
 
 
-Repo containing the CMB Angular Power Spectrum Emulator (`Capse.jl`).
+Repo containing the CMB Angular Power Spectrum Emulator, `Capse.jl`.
+
+`Capse.jl` is entirely written in `Julia`, but can be transparently called from `Python` using the [`pycapse`](https://github.com/CosmologicalEmulators/pycapse) wrapper.
 
 ## Citing
 

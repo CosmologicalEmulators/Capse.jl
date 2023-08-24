@@ -1,7 +1,7 @@
 name = "Capse"
 uuid = "994f66c3-d2c7-4ba6-88fb-4a10f50800ba"
 authors = ["marcobonici <bonici.marco@gmail.com>"]
-version = "0.2.1"
+version = "0.3.0"
 
 [deps]
 AbstractCosmologicalEmulators = "c83c1981-e5c4-4837-9eb8-c9b1572acfc6"

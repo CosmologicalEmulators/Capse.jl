@@ -32,14 +32,14 @@ end
 
 """
     get_Cℓ(CℓEmulator::AbstractCℓEmulators)
-Computes and returns the ``C_\\ell``on the ``\\ell``-grid the emulator has been trained on.
+Computes and returns the ``C_\\ell``on the ``\\ell``-grid that was previously passed to `eval_polygrid!`.
 """
 function get_Cℓ(input_params, CℓEmulator::AbstractCℓEmulators)
-    chebcoefs = _get_chebcoefs(input_params, CℓEmulator)
+    chebcoefs = get_chebcoefs(input_params, CℓEmulator)
     return CℓEmulator.PolyGrid * chebcoefs
 end
 
-function _get_chebcoefs(input_params, Clemulator::AbstractCℓEmulators)
+function get_chebcoefs(input_params, Clemulator::AbstractCℓEmulators)
     Clgrid = _get_Cℓ(input_params, Clemulator)
     return FastChebInterp.chebcoefs(Clgrid)
 end

@@ -3,6 +3,7 @@ module Capse
 using Base: @kwdef
 using AbstractCosmologicalEmulators
 import AbstractCosmologicalEmulators.get_emulator_description
+using FastChebInterp
 
 abstract type AbstractCℓEmulators end
 
@@ -26,6 +27,7 @@ It contains:
     ℓgrid::Array
     InMinMax::Matrix
     OutMinMax::Matrix
+    PolyGrid::Matrix = zeros(200,200)
 end
 
 """
@@ -33,11 +35,46 @@ end
 Computes and returns the ``C_\\ell``on the ``\\ell``-grid the emulator has been trained on.
 """
 function get_Cℓ(input_params, CℓEmulator::AbstractCℓEmulators)
+    chebcoefs = _get_chebcoefs(input_params, CℓEmulator)
+    return CℓEmulator.PolyGrid * chebcoefs
+end
+
+function _get_chebcoefs(input_params, Clemulator::AbstractCℓEmulators)
+    Clgrid = _get_Cℓ(input_params, Clemulator)
+    return FastChebInterp.chebcoefs(Clgrid)
+end
+
+function _get_Cℓ(input_params, CℓEmulator::AbstractCℓEmulators)
     input = deepcopy(input_params)
     maximin_input!(input, CℓEmulator.InMinMax)
     output = Array(run_emulator(input, CℓEmulator.TrainedEmulator))
     inv_maximin_output!(output, CℓEmulator.OutMinMax)
     return output .* exp(input_params[1]-3.)
+end
+
+function eval_polygrid!(Cl::CℓEmulator, myℓgrid::Array)
+    cb = FastChebInterp.ChebPoly(zeros(length(Cl.ℓgrid)),
+                                 FastChebInterp.SVector{1}([Cl.ℓgrid[begin]]),
+                                 FastChebInterp.SVector{1}([Cl.ℓgrid[end]]))
+    Cl.PolyGrid = _eval_polygrid(cb, myℓgrid)
+    return nothing
+end
+
+function eval_polygrid!(Cl::CℓEmulator)
+    eval_polygrid!(Cl, Cl.ℓgrid)
+    return nothing
+end
+
+function _eval_polygrid(cb::FastChebInterp.ChebPoly, l)
+    n = length(cb.coefs)
+    grid = zeros(length(l), n)
+
+    for i in 1:n
+        base_coefs = zero(cb)
+        base_coefs.coefs[i] = 1
+        grid[:,i] = base_coefs.(l)
+    end
+    return grid
 end
 
 """
@@ -50,6 +87,7 @@ end
 
 function get_emulator_description(Clemu::AbstractCℓEmulators)
     get_emulator_description(Clemu.TrainedEmulator)
+    return nothing
 end
 
 end # module

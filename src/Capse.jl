@@ -66,11 +66,6 @@ function eval_polygrid!(Cl::CℓEmulator, myℓgrid::Array)
     return nothing
 end
 
-function eval_polygrid!(Cl::CℓEmulator)
-    eval_polygrid!(Cl, Cl.ℓgrid)
-    return nothing
-end
-
 function _eval_polygrid(cb::FastChebInterp.ChebPoly, l)
     n = length(cb.coefs)
     grid = zeros(length(l), n)

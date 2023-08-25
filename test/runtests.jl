@@ -20,6 +20,7 @@ capse_emu = Capse.CℓEmulator(TrainedEmulator = emu, ℓgrid=ℓ_test, InMinMax
                                 OutMinMax = rand(40,2))
 
 @testset "Capse tests" begin
+    Capse.eval_polygrid!(capse_emu, ℓ_test)
     cosmo = ones(6)
     cosmo_vec = ones(6,6)
     output = Capse.get_Cℓ(cosmo,  capse_emu)

@@ -16,11 +16,13 @@ It contains:
 
 - TrainedEmulator::AbstractTrainedEmulators, the trained emulator
 
-- ℓgrid::Array, the ``\\ell``-grid the emulator has been trained on.
+- ℓgrid::Array, the ``\\ell``-grid used to train the emulator
 
 - InMinMax::Matrix, the `Matrix` used for the MinMax normalization of the input features
 
 - OutMinMax::Matrix, the `Matrix` used for the MinMax normalization of the output features
+
+- PolyGrid::Matrix, the `Matrix` which contains the Chebyshev polynomials evaluated on the requested ``\\ell``-grid
 """
 @kwdef mutable struct CℓEmulator <: AbstractCℓEmulators
     TrainedEmulator::AbstractTrainedEmulators
@@ -39,6 +41,10 @@ function get_Cℓ(input_params, CℓEmulator::AbstractCℓEmulators)
     return CℓEmulator.PolyGrid * chebcoefs
 end
 
+"""
+    get_Cℓ(CℓEmulator::AbstractCℓEmulators)
+Computes and returns the Chebyshev expansion coefficients ``a_{\\ell m}``.
+"""
 function get_chebcoefs(input_params, Clemulator::AbstractCℓEmulators)
     Clgrid = _get_Cℓ(input_params, Clemulator)
     return FastChebInterp.chebcoefs(Clgrid)
@@ -85,8 +91,12 @@ function get_ℓgrid(CℓEmulator::AbstractCℓEmulators)
     return CℓEmulator.ℓgrid
 end
 
-function get_emulator_description(Clemu::AbstractCℓEmulators)
-    get_emulator_description(Clemu.TrainedEmulator)
+"""
+    get_emulator_description(CℓEmulator::AbstractCℓEmulators)
+Prints on screen the data contained in the emulator.
+"""
+function get_emulator_description(CℓEmulator::AbstractCℓEmulators)
+    get_emulator_description(CℓEmulator.TrainedEmulator)
     return nothing
 end
 

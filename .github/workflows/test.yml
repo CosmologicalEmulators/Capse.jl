@@ -8,8 +8,7 @@ on:
       - develop
   push:
     branches:
-      - main
-      - develop
+        - '**'
     tags: '*'
 jobs:
   test:

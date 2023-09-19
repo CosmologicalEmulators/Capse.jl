@@ -37,9 +37,9 @@ Computes and returns the ``C_\\ell``on the ``\\ell``-grid the emulator has been 
 function get_Cℓ(input_params, CℓEmulator::AbstractCℓEmulators)
     input = deepcopy(input_params)
     maximin_input!(input, CℓEmulator.InMinMax)
-    output = run_emulator(input, CℓEmulator.TrainedEmulator)
+    output = Array(run_emulator(input, CℓEmulator.TrainedEmulator))
     inv_maximin_output!(output, CℓEmulator.OutMinMax)
-    return output .* exp(Array(input_params)[1]-3.)
+    return output .* exp(input_params[1]-3.)
 end
 
 """

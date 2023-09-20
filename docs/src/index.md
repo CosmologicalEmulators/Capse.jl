@@ -52,6 +52,11 @@ trained_emu = Capse.init_emulator(NN_dict, weights, Capse.SimpleChainsEmulator);
 
 `SimpleChains.jl` is faster expecially for small NN on the CPU. If you prefer to use `Lux.jl`, pass as last argument `Capse.LuxEmulator`.
 
+Each trained emulator should be shipped with a description within the JSON file. In order to print the description, just runs:
+
+```@example tutorial
+Capse.get_emulator_description(NN_dict["emulator_description"])
+```
 After instantiating the NN, we need:
 
 - the ``\ell``-grid used to train the emulator, `ℓgrid`

@@ -1,7 +1,11 @@
 module Capse
 
 using Base: @kwdef
+using Adapt
 using AbstractCosmologicalEmulators
+import AbstractCosmologicalEmulators.get_emulator_description
+
+export get_Cℓ, get_emulator_description
 
 abstract type AbstractCℓEmulators end
 
@@ -14,18 +18,20 @@ It contains:
 
 - TrainedEmulator::AbstractTrainedEmulators, the trained emulator
 
-- ℓgrid::Array, the ``\\ell``-grid the emulator has been trained on.
+- ℓgrid::AbstractVector, the ``\\ell``-grid the emulator has been trained on.
 
-- InMinMax::Matrix, the `Matrix` used for the MinMax normalization of the input features
+- InMinMax::AbstractMatrix, the `Matrix` used for the MinMax normalization of the input features
 
-- OutMinMax::Matrix, the `Matrix` used for the MinMax normalization of the output features
+- OutMinMax::AbstractMatrix, the `Matrix` used for the MinMax normalization of the output features
 """
 @kwdef mutable struct CℓEmulator <: AbstractCℓEmulators
     TrainedEmulator::AbstractTrainedEmulators
-    ℓgrid::Array
-    InMinMax::Matrix
-    OutMinMax::Matrix
+    ℓgrid::AbstractVector
+    InMinMax::AbstractMatrix
+    OutMinMax::AbstractMatrix
 end
+
+Adapt.@adapt_structure CℓEmulator
 
 """
     get_Cℓ(CℓEmulator::AbstractCℓEmulators)
@@ -45,6 +51,10 @@ Returns the ``\\ell``-grid the emulator has been trained on.
 """
 function get_ℓgrid(CℓEmulator::AbstractCℓEmulators)
     return CℓEmulator.ℓgrid
+end
+
+function get_emulator_description(Clemu::AbstractCℓEmulators)
+    get_emulator_description(Clemu.TrainedEmulator)
 end
 
 end # module

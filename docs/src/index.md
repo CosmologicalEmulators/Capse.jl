@@ -10,6 +10,9 @@ default(palette = palette(:tab10))
 benchmark = BenchmarkTools.load("./assets/capse_benchmark.json")
 path_json = "./assets/nn_setup.json"
 weights = rand(20000)
+ℓgrid = ones(2000)
+InMinMax_array = zeros(2,2000)
+OutMinMax_array = zeros(2,2000)
 ```
 
 `Capse.jl` is a Julia package designed to emulate the computation of the CMB Angular Power Spectrum, with a speedup of several orders of magnitude.
@@ -43,8 +46,8 @@ After this, you just have to pass the `NN_dict` and the `weights` array to the `
 
 In order to instantiate the emulator, just run
 
-```julia
-trained_emu = Capse.init_emulator(NN_dict, weights, Capse.SimpleChainsEmulator)
+```@example tutorial
+trained_emu = Capse.init_emulator(NN_dict, weights, Capse.SimpleChainsEmulator);
 ```
 
 `SimpleChains.jl` is faster expecially for small NN on the CPU. If you prefer to use `Lux.jl`, pass as last argument `Capse.LuxEmulator`.
@@ -54,7 +57,6 @@ Each trained emulator should be shipped with a description within the JSON file.
 ```@example tutorial
 Capse.get_emulator_description(NN_dict["emulator_description"])
 ```
-
 After instantiating the NN, we need:
 
 - the ``\ell``-grid used to train the emulator, `ℓgrid`
@@ -62,12 +64,18 @@ After instantiating the NN, we need:
 
 Now you can instantiate the emulator, using
 
-```julia
+```@example tutorial
 Cℓ_emu = Capse.CℓEmulator(TrainedEmulator = trained_emu, ℓgrid = ℓgrid,
-                          InMinMax = InMinMax_array, OutMinMax = OutMinMax_array)
+                          InMinMax = InMinMax_array, OutMinMax = OutMinMax_array);
 ```
 
-After loading a trained `CℓTT_emu`, feed it some input parameters `x`.
+Each trained emulator should be shipped with a description within the JSON file. In order to print the description, just runs:
+
+```@example tutorial
+Capse.get_emulator_description(Cℓ_emu)
+```
+
+After loading a trained emulator, feed it some input parameters `x` in order to get the emulated $C_\ell$'s
 
 ```julia
 x = rand(6) # generate some random input

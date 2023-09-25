@@ -5,6 +5,7 @@ using Adapt
 using AbstractCosmologicalEmulators
 import AbstractCosmologicalEmulators.get_emulator_description
 import JSON.parsefile
+import NPZ.npzread
 
 export get_Cℓ, get_emulator_description
 

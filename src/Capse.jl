@@ -4,6 +4,7 @@ using Base: @kwdef
 using Adapt
 using AbstractCosmologicalEmulators
 import AbstractCosmologicalEmulators.get_emulator_description
+import JSON.parsefile
 
 export get_Cℓ, get_emulator_description
 
@@ -60,7 +61,7 @@ end
 function load_emulator(path::String, emu = SimpleChainsEmulator,
     ℓ_file = "l.npy", weights_file = "weights.npy", inminmax_file = "inminmax.npy",
     outminmax_file = "outminmax.npy", nn_setup_file = "nn_setup.json")
-    NN_dict = JSON.parsefile(path*nn_setup_file)
+    NN_dict = parsefile(path*nn_setup_file)
     ℓ = npzread(path*ℓ_file)
 
     weights = npzread(path*weights_file)

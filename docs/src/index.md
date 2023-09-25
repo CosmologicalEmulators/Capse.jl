@@ -9,10 +9,15 @@ using Capse
 default(palette = palette(:tab10))
 benchmark = BenchmarkTools.load("./assets/capse_benchmark.json")
 path_json = "./assets/nn_setup.json"
+path_data = "./assets/"
 weights = rand(20000)
 ℓgrid = ones(2000)
 InMinMax_array = zeros(2,2000)
 OutMinMax_array = zeros(2,2000)
+npzwrite("./assets/l.npy", ℓgrid)
+npzwrite("./assets/weights.npy", weights)
+npzwrite("./assets/inminmax.npy", inminmax)
+npzwrite("./assets/outminmax.npy", outminnax)
 ```
 
 `Capse.jl` is a Julia package designed to emulate the computation of the CMB Angular Power Spectrum, with a speedup of several orders of magnitude.
@@ -67,6 +72,12 @@ Now you can instantiate the emulator, using
 ```@example tutorial
 Cℓ_emu = Capse.CℓEmulator(TrainedEmulator = trained_emu, ℓgrid = ℓgrid,
                           InMinMax = InMinMax_array, OutMinMax = OutMinMax_array);
+```
+
+A possible, shorter path, is represented by the following one-liner:
+
+```@example tutorial
+Cℓ_emu = Capse.load_emulator(weights_folder)
 ```
 
 Each trained emulator should be shipped with a description within the JSON file. In order to print the description, just runs:

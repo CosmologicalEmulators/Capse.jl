@@ -57,7 +57,7 @@ function get_emulator_description(Clemu::AbstractCℓEmulators)
     get_emulator_description(Clemu.TrainedEmulator)
 end
 
-function load_emulator(path::String, emu::AbstractTrainedEmulators = SimpleChainsEmulator,
+function load_emulator(path::String, emu = SimpleChainsEmulator,
     ℓ_file = "l.npy", weights_file = "weights.npy", inminmax_file = "inminmax.npy",
     outminmax_file = "outminmax.npy", nn_setup_file = "nn_setup.json")
     NN_dict = JSON.parsefile(path*nn_setup_file)

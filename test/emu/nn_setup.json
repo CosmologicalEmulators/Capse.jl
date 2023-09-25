@@ -11,7 +11,7 @@
         },
         "layer_3": {
             "n_neurons": 64,
-            "activation_function": "relu"
+            "activation_function": "tanh"
         },
         "layer_4": {
             "n_neurons": 64,

@@ -4,6 +4,8 @@ using Base: @kwdef
 using Adapt
 using AbstractCosmologicalEmulators
 import AbstractCosmologicalEmulators.get_emulator_description
+import JSON.parsefile
+import NPZ.npzread
 
 export get_Cℓ, get_emulator_description
 
@@ -55,6 +57,20 @@ end
 
 function get_emulator_description(Clemu::AbstractCℓEmulators)
     get_emulator_description(Clemu.TrainedEmulator)
+end
+
+function load_emulator(path::String, emu = SimpleChainsEmulator,
+    ℓ_file = "l.npy", weights_file = "weights.npy", inminmax_file = "inminmax.npy",
+    outminmax_file = "outminmax.npy", nn_setup_file = "nn_setup.json")
+    NN_dict = parsefile(path*nn_setup_file)
+    ℓ = npzread(path*ℓ_file)
+
+    weights = npzread(path*weights_file)
+    trained_emu = Capse.init_emulator(NN_dict, weights, emu)
+    Cℓ_emu = Capse.CℓEmulator(TrainedEmulator = trained_emu, ℓgrid = ℓ,
+                             InMinMax = npzread(path*inminmax_file),
+                             OutMinMax = npzread(path*outminmax_file))
+    return Cℓ_emu
 end
 
 end # module

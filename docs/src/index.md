@@ -18,6 +18,7 @@ npzwrite("./assets/l.npy", ℓgrid)
 npzwrite("./assets/weights.npy", weights)
 npzwrite("./assets/inminmax.npy", inminmax)
 npzwrite("./assets/outminmax.npy", outminnax)
+weights_folder = "./assets/"
 ```
 
 `Capse.jl` is a Julia package designed to emulate the computation of the CMB Angular Power Spectrum, with a speedup of several orders of magnitude.

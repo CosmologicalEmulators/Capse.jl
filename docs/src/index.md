@@ -5,14 +5,22 @@ using Plots; gr()
 Plots.reset_defaults()
 using JSON
 using BenchmarkTools
+using NPZ
 using Capse
 default(palette = palette(:tab10))
 benchmark = BenchmarkTools.load("./assets/capse_benchmark.json")
 path_json = "./assets/nn_setup.json"
-weights = rand(20000)
+path_data = "./assets/"
+weights = rand(500000)
 ℓgrid = ones(2000)
 InMinMax_array = zeros(2,2000)
 OutMinMax_array = zeros(2,2000)
+npzwrite("./assets/l.npy", ℓgrid)
+npzwrite("./assets/weights.npy", weights)
+npzwrite("./assets/inminmax.npy", InMinMax_array)
+npzwrite("./assets/outminmax.npy", OutMinMax_array)
+weights_folder = "./assets/"
+Cℓ_emu = Capse.load_emulator(weights_folder)
 ```
 
 `Capse.jl` is a Julia package designed to emulate the computation of the CMB Angular Power Spectrum, with a speedup of several orders of magnitude.
@@ -27,46 +35,32 @@ using Pkg, Pkg.add(url="https://github.com/CosmologicalEmulators/Capse.jl")
 
 ## Usage
 
-If you wanna use `Capse.jl` you need to load a trained emulator.
-We recommend to instantiate a trained `Capse-jl` emulator in the following way.
+In order to be able to use `Capse.jl`, there two major steps that need to be performed:
 
-First of all, instantiate a neural network with its weights and biases. This is done through a method imported through the upstream library [`AbstractCosmologicalEmulators.jl`](https://github.com/CosmologicalEmulators/AbstractCosmologicalEmulators.jl). In order to use it, you need a dictionary containg the information to instantiate the right neural network architecture and an array containing the weights and the biases (both of them can be found on [Zenodo](https://zenodo.org/record/8187935) and we plan to release more of them).
-At the given link above, you can find a `JSON` file with the aforementioned NN architecture. This can be read using the `JSON` library in the following way
+- Instantiating the emulators, e.g. initializing the Neural Network, its weight and biases and the quantities employed in pre and post-processing
+- Use the instantiated emulators to retrieve the spectra
 
-```@example tutorial
-NN_dict = JSON.parsefile(path_json);
+In the reminder of this section we are showing how this can be done.
+
+### Instantiation
+
+The most direct way to instantiate an official trained emulators is given by the following one-liner
+
+```julia
+Cℓ_emu = Capse.load_emulator(weights_folder);
 ```
 
-This file contains all the informations required to correctly instantiate the neural network.
+where `weights_folder` is the path to the folder containing the files required to build up the network. Some of the trained emulators can be found on [Zenodo](https://zenodo.org/record/8187935) and we plan to release more of them there in the future.
 
-After this, you just have to pass the `NN_dict` and the `weights` array to the `init_emulator` method and choose a NN backend. In this moment we support two different Neural Networks libraries:
+It is possible to pass an additional argument to the previous function, which is used to choose between the two NN backed now available:
 
 - [SimpleChains](https://github.com/PumasAI/SimpleChains.jl), which is taylored for small NN running on a CPU
 - [Lux](https://github.com/LuxDL/Lux.jl), which can run on a GPU
 
-In order to instantiate the emulator, just run
+`SimpleChains.jl` is faster expecially for small NN on the CPU. If you wanna use something running on a GPU, you should use `Lux.jl`, which can be done adding an additional argument to the `load_emulator` function, `Capse.LuxEmulator`
 
-```@example tutorial
-trained_emu = Capse.init_emulator(NN_dict, weights, Capse.SimpleChainsEmulator);
-```
-
-`SimpleChains.jl` is faster expecially for small NN on the CPU. If you prefer to use `Lux.jl`, pass as last argument `Capse.LuxEmulator`.
-
-Each trained emulator should be shipped with a description within the JSON file. In order to print the description, just runs:
-
-```@example tutorial
-Capse.get_emulator_description(NN_dict["emulator_description"])
-```
-After instantiating the NN, we need:
-
-- the ``\ell``-grid used to train the emulator, `ℓgrid`
-- the arrays used to perform the minmax normalization of both input and output features, `InMinMax_array` and `OutMinMax_array`
-
-Now you can instantiate the emulator, using
-
-```@example tutorial
-Cℓ_emu = Capse.CℓEmulator(TrainedEmulator = trained_emu, ℓgrid = ℓgrid,
-                          InMinMax = InMinMax_array, OutMinMax = OutMinMax_array);
+```julia
+Cℓ_emu = Capse.load_emulator(weights_folder, Capse.LuxEmulator);
 ```
 
 Each trained emulator should be shipped with a description within the JSON file. In order to print the description, just runs:
@@ -98,11 +92,11 @@ Using `Lux.jl`, with the same architecture and weights, we obtain
 benchmark[1]["Capse"]["Lux"] # hide
 ```
 
-SimpleChains is about 2 times faster than Lux and they give the same result up to floating point precision.
+`SimpleChains.jl` is about 2 times faster than `Lux.jl` and they give the same result up to floating point precision.
 
 This benchmarks have been performed locally, with a 12th Gen Intel® Core™ i7-1260P.
 
-Considering that a high-precision settings calculation performed with [`CAMB`](https://github.com/cmbant/CAMB) on the same machine requires around 60 seconds, `Capse.jl` is around ``1,000,000`` times faster.
+Considering that a high-precision settings calculation performed with [`CAMB`](https://github.com/cmbant/CAMB) on the same machine requires around 60 seconds, `Capse.jl` is 5-6 order of magnitudes faster.
 
 ### Authors
 

@@ -11,7 +11,7 @@ default(palette = palette(:tab10))
 benchmark = BenchmarkTools.load("./assets/capse_benchmark.json")
 path_json = "./assets/nn_setup.json"
 path_data = "./assets/"
-weights = rand(20000)
+weights = rand(500000)
 ℓgrid = ones(2000)
 InMinMax_array = zeros(2,2000)
 OutMinMax_array = zeros(2,2000)
@@ -20,6 +20,7 @@ npzwrite("./assets/weights.npy", weights)
 npzwrite("./assets/inminmax.npy", InMinMax_array)
 npzwrite("./assets/outminmax.npy", OutMinMax_array)
 weights_folder = "./assets/"
+Cℓ_emu = Capse.load_emulator(weights_folder)
 ```
 
 `Capse.jl` is a Julia package designed to emulate the computation of the CMB Angular Power Spectrum, with a speedup of several orders of magnitude.
@@ -45,8 +46,8 @@ In the reminder of this section we are showing how this can be done.
 
 The most direct way to instantiate an official trained emulators is given by the following one-liner
 
-```@example tutorial
-Cℓ_emu = Capse.load_emulator(weights_folder)
+```julia
+Cℓ_emu = Capse.load_emulator(weights_folder);
 ```
 
 where `weights_folder` is the path to the folder containing the files required to build up the network. Some of the trained emulators can be found on [Zenodo](https://zenodo.org/record/8187935) and we plan to release more of them there in the future.
@@ -56,7 +57,11 @@ It is possible to pass an additional argument to the previous function, which is
 - [SimpleChains](https://github.com/PumasAI/SimpleChains.jl), which is taylored for small NN running on a CPU
 - [Lux](https://github.com/LuxDL/Lux.jl), which can run on a GPU
 
-`SimpleChains.jl` is faster expecially for small NN on the CPU. If you prefer to use `Lux.jl`, pass as last argument `Capse.LuxEmulator`. The former is the default value, so need to specify it. For the latter, just add `Capse.LuxEmulator`.
+`SimpleChains.jl` is faster expecially for small NN on the CPU. If you wanna use something running on a GPU, you should use `Lux.jl`, which can be done adding an additional argument to the `load_emulator` function, `Capse.LuxEmulator`
+
+```julia
+Cℓ_emu = Capse.load_emulator(weights_folder, Capse.LuxEmulator);
+```
 
 Each trained emulator should be shipped with a description within the JSON file. In order to print the description, just runs:
 
@@ -87,11 +92,11 @@ Using `Lux.jl`, with the same architecture and weights, we obtain
 benchmark[1]["Capse"]["Lux"] # hide
 ```
 
-SimpleChains is about 2 times faster than Lux and they give the same result up to floating point precision.
+`SimpleChains.jl` is about 2 times faster than `Lux.jl` and they give the same result up to floating point precision.
 
 This benchmarks have been performed locally, with a 12th Gen Intel® Core™ i7-1260P.
 
-Considering that a high-precision settings calculation performed with [`CAMB`](https://github.com/cmbant/CAMB) on the same machine requires around 60 seconds, `Capse.jl` is around ``1,000,000`` times faster.
+Considering that a high-precision settings calculation performed with [`CAMB`](https://github.com/cmbant/CAMB) on the same machine requires around 60 seconds, `Capse.jl` is 5-6 order of magnitudes faster.
 
 ### Authors
 

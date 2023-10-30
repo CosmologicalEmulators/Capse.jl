@@ -31,6 +31,7 @@ It contains:
     ℓgrid::AbstractVector
     InMinMax::AbstractMatrix
     OutMinMax::AbstractMatrix
+    Preprocessing::Function
 end
 
 Adapt.@adapt_structure CℓEmulator
@@ -45,7 +46,7 @@ function get_Cℓ(input_params, Cℓemu::AbstractCℓEmulators)
     maximin_input!(input, Cℓemu.InMinMax)
     output = Array(run_emulator(input, Cℓemu.TrainedEmulator))
     inv_maximin_output!(output, Cℓemu.OutMinMax)
-    return output .* exp(input_params[1]-3.)
+    return Cℓemu.Preprocessing(input, output)
 end
 
 """
@@ -77,15 +78,19 @@ If the corresponding file in the folder you are trying to load have different na
 """
 function load_emulator(path::String, emu = SimpleChainsEmulator,
     ℓ_file = "l.npy", weights_file = "weights.npy", inminmax_file = "inminmax.npy",
-    outminmax_file = "outminmax.npy", nn_setup_file = "nn_setup.json")
+    outminmax_file = "outminmax.npy", nn_setup_file = "nn_setup.json",
+    preprocessing_file = "preprocessing.jl")
     NN_dict = parsefile(path*nn_setup_file)
     ℓ = npzread(path*ℓ_file)
+    include(path*preprocessing_file)
+    #we assume there is a preprocessing() function in
 
     weights = npzread(path*weights_file)
     trained_emu = Capse.init_emulator(NN_dict, weights, emu)
     Cℓ_emu = Capse.CℓEmulator(TrainedEmulator = trained_emu, ℓgrid = ℓ,
                              InMinMax = npzread(path*inminmax_file),
-                             OutMinMax = npzread(path*outminmax_file))
+                             OutMinMax = npzread(path*outminmax_file),
+                             Preprocessing = preprocessing)
     return Cℓ_emu
 end
 

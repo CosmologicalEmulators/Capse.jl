@@ -46,7 +46,7 @@ function get_Cℓ(input_params, Cℓemu::AbstractCℓEmulators)
     maximin_input!(input, Cℓemu.InMinMax)
     output = Array(run_emulator(input, Cℓemu.TrainedEmulator))
     inv_maximin_output!(output, Cℓemu.OutMinMax)
-    return Cℓemu.Preprocessing(input, output)
+    return Cℓemu.Preprocessing(input_params, output)
 end
 
 """

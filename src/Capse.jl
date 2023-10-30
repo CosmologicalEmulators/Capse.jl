@@ -24,7 +24,9 @@ It contains:
 
 - `InMinMax::AbstractMatrix`, the `Matrix` used for the MinMax normalization of the input features
 
-- O`utMinMax::AbstractMatrix`, the `Matrix` used for the MinMax normalization of the output features
+- `OutMinMax::AbstractMatrix`, the `Matrix` used for the MinMax normalization of the output features
+
+- `Postprocessing::Function`, the `Funciton` used for the postprocessing
 """
 @kwdef mutable struct CℓEmulator <: AbstractCℓEmulators
     TrainedEmulator::AbstractTrainedEmulators
@@ -79,10 +81,10 @@ If the corresponding file in the folder you are trying to load have different na
 function load_emulator(path::String, emu = SimpleChainsEmulator,
     ℓ_file = "l.npy", weights_file = "weights.npy", inminmax_file = "inminmax.npy",
     outminmax_file = "outminmax.npy", nn_setup_file = "nn_setup.json",
-    preprocessing_file = "preprocessing.jl")
+    postprocessing_file = "postprocessing.jl")
     NN_dict = parsefile(path*nn_setup_file)
     ℓ = npzread(path*ℓ_file)
-    include(path*preprocessing_file)
+    include(path*postprocessing_file)
     #we assume there is a preprocessing() function in
 
     weights = npzread(path*weights_file)
@@ -90,7 +92,7 @@ function load_emulator(path::String, emu = SimpleChainsEmulator,
     Cℓ_emu = Capse.CℓEmulator(TrainedEmulator = trained_emu, ℓgrid = ℓ,
                              InMinMax = npzread(path*inminmax_file),
                              OutMinMax = npzread(path*outminmax_file),
-                             Preprocessing = preprocessing)
+                             Postprocessing = postprocessing)
     return Cℓ_emu
 end
 

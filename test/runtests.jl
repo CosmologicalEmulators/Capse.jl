@@ -24,8 +24,10 @@ npzwrite("emu/inminmax.npy", inminmax)
 npzwrite("emu/outminmax.npy", outminmax)
 emu = Capse.SimpleChainsEmulator(Architecture = mlpd, Weights = weights)
 
+postprocessing(input, output) = output
+
 capse_emu = Capse.CℓEmulator(TrainedEmulator = emu, ℓgrid=ℓ_test, InMinMax = inminmax,
-                                OutMinMax = outminmax)
+                                OutMinMax = outminmax, Postprocessing = postprocessing)
 capse_loaded_emu = Capse.load_emulator("emu/")
 
 @testset "Capse tests" begin

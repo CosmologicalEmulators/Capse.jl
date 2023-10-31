@@ -26,7 +26,7 @@ It contains:
 
 - `OutMinMax::AbstractMatrix`, the `Matrix` used for the MinMax normalization of the output features
 
-- `Postprocessing::Function`, the `Funciton` used for the postprocessing
+- `Postprocessing::Function`, the `Function` used for the postprocessing of the NN output
 """
 @kwdef mutable struct CℓEmulator <: AbstractCℓEmulators
     TrainedEmulator::AbstractTrainedEmulators
@@ -48,7 +48,7 @@ function get_Cℓ(input_params, Cℓemu::AbstractCℓEmulators)
     maximin_input!(input, Cℓemu.InMinMax)
     output = Array(run_emulator(input, Cℓemu.TrainedEmulator))
     inv_maximin_output!(output, Cℓemu.OutMinMax)
-    return Cℓemu.Postprocessing(input_params, output)
+    return Cℓemu.Postprocessing(input_params, output, Cℓemu)
 end
 
 """
@@ -76,7 +76,9 @@ The following keyword arguments are used to specify the name of the files used t
 - `inminmax_file`, default `inminmax.npy`
 - `outminmax_file`, default `outminmax.npy`
 - `nn_setup_file`, default `nn_setup.json`
-If the corresponding file in the folder you are trying to load have different names, just change the default values.
+- `postprocessing_file`, default `postprocessing.jl`
+If the corresponding file in the folder you are trying to load have different names,
+ change the default values accordingly.
 """
 function load_emulator(path::String, emu = SimpleChainsEmulator,
     ℓ_file = "l.npy", weights_file = "weights.npy", inminmax_file = "inminmax.npy",
@@ -85,7 +87,7 @@ function load_emulator(path::String, emu = SimpleChainsEmulator,
     NN_dict = parsefile(path*nn_setup_file)
     ℓ = npzread(path*ℓ_file)
     include(path*postprocessing_file)
-    #we assume there is a preprocessing() function in
+    #we assume there is a postprocessing() function in the postprocessing_file
 
     weights = npzread(path*weights_file)
     trained_emu = Capse.init_emulator(NN_dict, weights, emu)

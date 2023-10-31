@@ -7,6 +7,18 @@ using JSON
 using BenchmarkTools
 using NPZ
 using Capse
+using SimpleChains
+
+mlpd = SimpleChain(
+  static(6),
+  TurboDense(tanh, 64),
+  TurboDense(tanh, 64),
+  TurboDense(tanh, 64),
+  TurboDense(tanh, 64),
+  TurboDense(tanh, 64),
+  TurboDense(identity, 4999)
+)
+
 default(palette = palette(:tab10))
 benchmark = BenchmarkTools.load("./assets/capse_benchmark.json")
 path_json = "./assets/nn_setup.json"
@@ -15,16 +27,23 @@ weights = rand(500000)
 ℓgrid = ones(2000)
 InMinMax_array = zeros(2,2000)
 OutMinMax_array = zeros(2,2000)
-npzwrite("./assets/l.npy", ℓgrid)
-npzwrite("./assets/weights.npy", weights)
-npzwrite("./assets/inminmax.npy", InMinMax_array)
-npzwrite("./assets/outminmax.npy", OutMinMax_array)
-touch("./assets/postprocessing.jl")
-file = open("./assets/postprocessing.jl", "w")
-write(file, "postprocessing(a,b,c) = b")
-close(file)
-weights_folder = "./assets/"
-Cℓ_emu = Capse.load_emulator(weights_folder)
+nn_setup = parsefile(path_json)
+#npzwrite("./assets/l.npy", ℓgrid)
+#npzwrite("./assets/weights.npy", weights)
+#npzwrite("./assets/inminmax.npy", InMinMax_array)
+#npzwrite("./assets/outminmax.npy", OutMinMax_array)
+#touch("./assets/postprocessing.jl")
+#file = open("./assets/postprocessing.jl", "w")
+#write(file, "postprocessing(a,b,c) = b")
+#close(file)
+#weights_folder = "./assets/"
+#Cℓ_emu = Capse.load_emulator(weights_folder)
+emu = Capse.SimpleChainsEmulator(Architecture = mlpd, Weights = weights,
+                                 Description = nn_setup)
+postprocessing(input, output, Cℓemu) = output .* exp(input[1]-3.)
+Cℓ_emu = Capse.CℓEmulator(TrainedEmulator = emu, ℓgrid=ℓgrid, InMinMax = InMinMax_array,
+                                OutMinMax = OutMinMax_array,
+                                Postprocessing = postprocessing)
 ```
 
 `Capse.jl` is a Julia package designed to emulate the computation of the CMB Angular Power Spectrum, with a speedup of several orders of magnitude.

@@ -19,6 +19,10 @@ npzwrite("./assets/l.npy", ℓgrid)
 npzwrite("./assets/weights.npy", weights)
 npzwrite("./assets/inminmax.npy", InMinMax_array)
 npzwrite("./assets/outminmax.npy", OutMinMax_array)
+touch("./assets/postprocessing.jl")
+file = open("./assets/postprocessing.jl", "w")
+write(file, "postprocessing(a,b,c) = b")
+close(file)
 weights_folder = "./assets/"
 Cℓ_emu = Capse.load_emulator(weights_folder)
 ```

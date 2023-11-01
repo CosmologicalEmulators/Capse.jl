@@ -10,7 +10,7 @@ JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 NPZ = "15e1cf62-19b3-5cfa-8e77-841668bca605"
 
 [compat]
-AbstractCosmologicalEmulators = "0.3.3"
+AbstractCosmologicalEmulators = "0.3.3, 0.4"
 Adapt = "3"
 JSON = "0.21"
 NPZ = "0.4"

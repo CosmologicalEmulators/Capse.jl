@@ -81,7 +81,7 @@ The following keyword arguments are used to specify the name of the files used t
 If the corresponding file in the folder you are trying to load have different names,
  change the default values accordingly.
 """
-function load_emulator(path::String, emu = SimpleChainsEmulator,
+function load_emulator(path::String; emu = SimpleChainsEmulator,
     ℓ_file = "l.npy", weights_file = "weights.npy", inminmax_file = "inminmax.npy",
     outminmax_file = "outminmax.npy", nn_setup_file = "nn_setup.json",
     postprocessing_file = "postprocessing.jl")

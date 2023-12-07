@@ -36,7 +36,7 @@ Cℓ_emu = Capse.CℓEmulator(TrainedEmulator = emu, ℓgrid=ℓgrid, InMinMax =
                                 Postprocessing = postprocessing)
 ```
 
-`Capse.jl` is a Julia package designed to emulate the computation of the CMB Angular Power Spectrum, with a speedup of several orders of magnitude compared to standard codes.
+`Capse.jl` is a Julia package designed to emulate the computation of the CMB Angular Power Spectrum, with a speedup of several orders of magnitude compared to standard codes such as CAMB or CLASS. The core functionalities of `Capse.jl` are inherithed by the upstream library [`AbstractCosmologicalEmulators.jl`](https://github.com/CosmologicalEmulators/AbstractCosmologicalEmulators.jl).
 
 ## Installation
 
@@ -70,10 +70,10 @@ It is possible to pass an additional argument to the previous function, which is
 - [SimpleChains](https://github.com/PumasAI/SimpleChains.jl), which is taylored for small NN running on a CPU
 - [Lux](https://github.com/LuxDL/Lux.jl), which can run both on CPUs and GPUs
 
-`SimpleChains.jl` is faster expecially for small NN on the CPU. If you wanna use something running on a GPU, you should use `Lux.jl`, which can be done adding an additional argument to the `load_emulator` function, `Capse.LuxEmulator`
+`SimpleChains.jl` is faster expecially for small NN on the CPU. If you wanna use something running on a GPU, you should use `Lux.jl`, which can be loaded adding an additional argument to the `load_emulator` function, `Capse.LuxEmulator`
 
 ```julia
-Cℓ_emu = Capse.load_emulator(weights_folder, Capse.LuxEmulator);
+Cℓ_emu = Capse.load_emulator(weights_folder, emu = Capse.LuxEmulator);
 ```
 
 Each trained emulator should be shipped with a description within the JSON file. In order to print the description, just runs:
@@ -108,9 +108,9 @@ Using `Lux.jl`, with the same architecture and weights, we obtain
 benchmark[1]["Capse"]["Lux"] # hide
 ```
 
-`SimpleChains.jl` is about 2 times faster than `Lux.jl` and they give the same result up to floating point precision.
+`Lux.jl` is around 20% slower than `SimpleChains.jl` and they give the same result up to floating point precision.
 
-These benchmarks have been performed locally, with a 12th Gen Intel® Core™ i7-1260P.
+These benchmarks have been performed locally, with a 13th Gen Intel® Core™ i7-13700H.
 
 Considering that a high-precision settings calculation performed with [`CAMB`](https://github.com/cmbant/CAMB) on the same machine requires around 60 seconds, `Capse.jl` is 5-6 order of magnitudes faster.
 

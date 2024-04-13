@@ -45,11 +45,10 @@ Computes and returns the ``C_\\ell``'s on the ``\\ell``-grid the emulator has be
 
 """
 function get_Cℓ(input_params, Cℓemu::AbstractCℓEmulators)
-    input = deepcopy(input_params)
-    maximin_input!(input, Cℓemu.InMinMax)
-    output = Array(run_emulator(input, Cℓemu.TrainedEmulator))
-    inv_maximin_output!(output, Cℓemu.OutMinMax)
-    return Cℓemu.Postprocessing(input_params, output, Cℓemu)
+    norm_input = maximin_input(input_params, Cℓemu.InMinMax)
+    output = Array(run_emulator(norm_input, Cℓemu.TrainedEmulator))
+    norm_output = inv_maximin_output(output, Cℓemu.OutMinMax)
+    return Cℓemu.Postprocessing(input_params, norm_output, Cℓemu)
 end
 
 """

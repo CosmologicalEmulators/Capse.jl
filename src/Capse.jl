@@ -3,7 +3,6 @@ module Capse
 using Base: @kwdef
 using Adapt
 using AbstractCosmologicalEmulators
-using IRTools
 import AbstractCosmologicalEmulators.get_emulator_description
 import JSON.parsefile
 import NPZ.npzread
@@ -86,19 +85,13 @@ function load_emulator(path::String; emu = SimpleChainsEmulator,
     postprocessing_file = "postprocessing.jl")
     NN_dict = parsefile(path*nn_setup_file)
     ℓ = npzread(path*ℓ_file)
-    include(path*postprocessing_file)
-    #we assume there is a postprocessing() function in the postprocessing_file
-    #TODO not exactly elegant. Maybe ask to more proficient people?
-    _postprocessing = @code_ir postprocessing(1,2,3)
-    Postprocessing = IRTools.func(_postprocessing)
-    postprocess(a,b,c) = Postprocessing(_postprocessing, a,b,c)
 
     weights = npzread(path*weights_file)
     trained_emu = Capse.init_emulator(NN_dict, weights, emu)
     Cℓ_emu = Capse.CℓEmulator(TrainedEmulator = trained_emu, ℓgrid = ℓ,
                              InMinMax = npzread(path*inminmax_file),
                              OutMinMax = npzread(path*outminmax_file),
-                             Postprocessing = postprocess)
+                             Postprocessing = include(path*postprocessing_file))
     return Cℓ_emu
 end
 

@@ -44,11 +44,10 @@ Computes and returns the ``C_\\ell``'s on the ``\\ell``-grid the emulator has be
 
 """
 function get_Cℓ(input_params, Cℓemu::AbstractCℓEmulators)
-    input = deepcopy(input_params)
-    maximin_input!(input, Cℓemu.InMinMax)
-    output = Array(run_emulator(input, Cℓemu.TrainedEmulator))
-    inv_maximin_output!(output, Cℓemu.OutMinMax)
-    return Cℓemu.Postprocessing(input_params, output, Cℓemu)
+    norm_input = maximin_input(input_params, Cℓemu.InMinMax)
+    output = Array(run_emulator(norm_input, Cℓemu.TrainedEmulator))
+    norm_output = inv_maximin_output(output, Cℓemu.OutMinMax)
+    return Cℓemu.Postprocessing(input_params, norm_output, Cℓemu)
 end
 
 """
@@ -80,21 +79,19 @@ The following keyword arguments are used to specify the name of the files used t
 If the corresponding file in the folder you are trying to load have different names,
  change the default values accordingly.
 """
-function load_emulator(path::String, emu = SimpleChainsEmulator,
+function load_emulator(path::String; emu = SimpleChainsEmulator,
     ℓ_file = "l.npy", weights_file = "weights.npy", inminmax_file = "inminmax.npy",
     outminmax_file = "outminmax.npy", nn_setup_file = "nn_setup.json",
     postprocessing_file = "postprocessing.jl")
     NN_dict = parsefile(path*nn_setup_file)
     ℓ = npzread(path*ℓ_file)
-    include(path*postprocessing_file)
-    #we assume there is a postprocessing() function in the postprocessing_file
 
     weights = npzread(path*weights_file)
     trained_emu = Capse.init_emulator(NN_dict, weights, emu)
     Cℓ_emu = Capse.CℓEmulator(TrainedEmulator = trained_emu, ℓgrid = ℓ,
                              InMinMax = npzread(path*inminmax_file),
                              OutMinMax = npzread(path*outminmax_file),
-                             Postprocessing = postprocessing)
+                             Postprocessing = include(path*postprocessing_file))
     return Cℓ_emu
 end
 

@@ -108,7 +108,13 @@ Using `Lux.jl`, with the same architecture and weights, we obtain
 benchmark[1]["Capse"]["Lux"] # hide
 ```
 
-`Lux.jl` is around 20% slower than `SimpleChains.jl` and they give the same result up to floating point precision.
+`SimpleChains.jl` is around 7 times faster than `Lux.jl` and they give the same result up to floating point precision.
+
+!!! warning
+
+    Currently, there is an ongoing investigation on the performance of the `Lux.jl` backend.
+    Its performance was just 20% slower than `SimpleChains.jl`, but in a new release the
+    performance significantly dropped.
 
 These benchmarks have been performed locally, with a 13th Gen Intel® Core™ i7-13700H.
 

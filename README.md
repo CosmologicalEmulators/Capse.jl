@@ -43,6 +43,6 @@ Capse.get_emulator_description(Cℓ_emu)
 
 ## Citing
 
-Free usage of the software in this repository is provided, given that you cite our release paper.
+Free usage of `Capse.jl` is provided, given that you cite our release paper.
 
 M. Bonici, F. Bianchini, J. Ruiz-Zapatero, [_Capse: efficient and auto-differentiable CMB power spectra emulation_](https://arxiv.org/abs/2307.14339)

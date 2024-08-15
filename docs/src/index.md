@@ -108,15 +108,16 @@ Using `Lux.jl`, with the same architecture and weights, we obtain
 benchmark[1]["Capse"]["Lux"] # hide
 ```
 
-`SimpleChains.jl` is around 7 times faster than `Lux.jl` and they give the same result up to floating point precision.
+`SimpleChains.jl` have almost the same performance `Lux.jl` and they give the same result up to floating point precision.
 
 !!! warning
 
-    Currently, there is an ongoing investigation on the performance of the `Lux.jl` backend.
-    Its performance was just 20% slower than `SimpleChains.jl`, but in a new release the
-    performance significantly dropped.
+    Currently, there is a performance issue when using `Lux.jl` in a multi-threaded scenario. This is
+    something known (see disccussion [here](https://github.com/LuxDL/Lux.jl/issues/847)).
+    In case you wanna launch multiple chains locally, the suggested (working) strategy with `Lux.jl`
+    is to use distributed computing.
 
-These benchmarks have been performed locally, with a 13th Gen Intel® Core™ i7-13700H.
+These benchmarks have been performed locally, with a 13th Gen Intel® Core™ i7-13700H, using a single core.
 
 Considering that a high-precision settings calculation performed with [`CAMB`](https://github.com/cmbant/CAMB) on the same machine requires around 60 seconds, `Capse.jl` is 5-6 order of magnitudes faster.
 

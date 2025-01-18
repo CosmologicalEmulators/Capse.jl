@@ -1,4 +1,4 @@
-# Capse.jl
+<img src="https://github.com/user-attachments/assets/6b67eac9-06ca-48c0-b259-5389a4638e9e" alt="Capse" width="450" />
 
 | **Documentation** | **Build Status** | **Code style** |
 |:--------:|:----------------:|:----------------:|

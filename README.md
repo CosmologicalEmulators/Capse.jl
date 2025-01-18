@@ -1,4 +1,4 @@
-<img src="https://github.com/user-attachments/assets/6b67eac9-06ca-48c0-b259-5389a4638e9e" alt="Capse" width="450" />
+<img src="https://github.com/user-attachments/assets/a414b6e8-e5ed-4655-857b-3c59f26867e3" alt="Capse" width="450" />
 
 | **Documentation** | **Build Status** | **Code style** |
 |:--------:|:----------------:|:----------------:|

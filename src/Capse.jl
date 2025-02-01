@@ -63,7 +63,12 @@ end
 Print on screen the emulator description.
 """
 function get_emulator_description(Cℓemu::AbstractCℓEmulators)
-    get_emulator_description(Cℓemu.TrainedEmulator)
+    if haskey(Cℓemu.TrainedEmulator.Description, "emulator_description")
+        get_emulator_description(Cℓemu.TrainedEmulator)
+    else
+        @warn "No emulator description found!"
+    end
+    return nothing
 end
 
 """

@@ -8,7 +8,7 @@ push!(LOAD_PATH,"../src/")
 makedocs(
     modules = [Capse],
     format = Documenter.HTML(prettyurls = get(ENV, "CI", nothing) == "true",
-    sidebar_sitename=true),
+    sidebar_sitename=false),
     sitename = "Capse.jl",
     authors  = "Marco Bonici",
     pages = [

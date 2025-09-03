@@ -15,7 +15,7 @@ Repo containing the CMB Angular Power Spectrum Emulator, `Capse.jl`.
 
 ## Installation and usage
 
-Details about installing and using `Capse.jl` can be found in the official [documentation](https://cosmologicalemulators.github.io/Capse.jl/stable/), but can be summerized as follows.
+Details about installing and using `Capse.jl` can be found in the official [documentation](https://cosmologicalemulators.github.io/Capse.jl/stable/), but can be summarized as follows.
 
 In order to install `Capse.jl`, run from the `Julia` REPL
 

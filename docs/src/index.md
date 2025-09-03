@@ -6,14 +6,13 @@
 
 ## Overview
 
-**Capse.jl** is a high-performance Julia package for emulating Cosmic Microwave Background (CMB) Angular Power Spectra using neural networks. It provides speedups of 5-6 orders of magnitude compared to traditional Boltzmann codes like CAMB or CLASS, while maintaining high accuracy.
+**Capse.jl** is a high-performance Julia package for emulating Cosmic Microwave Background (CMB) Angular Power Spectra using neural networks. It provides speedups of 5-6 orders of magnitude compared to traditional Boltzmann codes like `CAMB` or `CLASS`, while maintaining high accuracy.
 
 ### Key Features
 
 - ⚡ **Ultra-fast inference**: ~45 microseconds per evaluation
-- 🎯 **High accuracy**: Trained on high-precision cosmological simulations
-- 🔧 **Multiple backends**: Support for CPU (SimpleChains) and GPU (Lux) computation
-- 🐍 **Python interoperability**: Seamless integration via [pycapse](https://github.com/CosmologicalEmulators/pycapse)
+- 🔧 **Multiple backends**: Support for CPU (`SimpleChains.jl`) and GPU (`Lux.jl`) computation
+- 🐍 **Python interoperability**: Seamless integration via [jaxcapse](https://github.com/CosmologicalEmulators/jaxcapse)
 - ♻️ **Auto-differentiable**: Full support for gradient-based optimization
 - 🔬 **Extensible**: Built on AbstractCosmologicalEmulators.jl framework
 
@@ -49,7 +48,7 @@ Cℓ = Capse.get_Cℓ(params, Cℓ_emu)
 
 ### Loading Emulators
 
-Capse.jl supports loading pre-trained emulators from disk. Trained weights are available on [Zenodo](https://zenodo.org/record/8187935).
+`Capse.jl` supports loading pre-trained emulators from disk. Trained weights are available on [Zenodo](https://zenodo.org/record/8187935).
 
 ```julia
 # Default loading (uses SimpleChains backend)
@@ -80,7 +79,7 @@ Capse.get_emulator_description(Cℓ_emu)
 ```
 
 Common parameter sets include:
-- Standard ΛCDM: `[ωb, ωc, h, ns, σ8, As]`
+- Standard ΛCDM: `[ωb, ωc, h, ns, τ, As]`
 - Extended models with neutrinos, dark energy, etc.
 
 ⚠️ **Important**: Parameter ordering must match the training configuration exactly.
@@ -99,7 +98,7 @@ Cℓ_batch = Capse.get_Cℓ(params_batch, Cℓ_emu)
 
 ### Backend Selection
 
-#### SimpleChains (CPU-optimized)
+#### `SimpleChains.jl` (CPU-optimized)
 Best for:
 - Small to medium neural networks
 - Single-threaded applications
@@ -110,11 +109,10 @@ using SimpleChains
 Cℓ_emu = Capse.load_emulator("weights/", emu=Capse.SimpleChainsEmulator)
 ```
 
-#### Lux (GPU-capable)
+#### `Lux.jl` (GPU-capable)
 Best for:
 - Large neural networks
 - GPU acceleration
-- Distributed computing
 
 ```julia
 using Lux, CUDA
@@ -127,7 +125,7 @@ Cℓ_emu_gpu = adapt(CuArray, Cℓ_emu)
 
 ### Error Handling
 
-Capse.jl includes robust input validation:
+`Capse.jl` includes robust input validation:
 
 ```julia
 # These will throw informative errors
@@ -150,14 +148,13 @@ On a 13th Gen Intel Core i7-13700H (single core):
 
 | Method | Time per evaluation | Speedup |
 |--------|-------------------|---------|
-| CAMB (high accuracy) | ~60 seconds | 1× |
-| CLASS (high accuracy) | ~50 seconds | 0.8× |
-| **Capse.jl (SimpleChains)** | **~45 μs** | **~1,300,000×** |
-| **Capse.jl (Lux)** | **~50 μs** | **~1,200,000×** |
+| `CAMB` (high accuracy) | ~60 seconds | 1× |
+| `CLASS` (high accuracy) | ~50 seconds | 0.8× |
+| **`Capse.jl` (SimpleChains)** | **~45 μs** | **~1,300,000×** |
 
 ### Optimization Tips
 
-1. **Use appropriate backend**: SimpleChains for CPU, Lux for GPU
+1. **Use appropriate backend**: `SimpleChains.` for CPU, `Lux.` for GPU
 2. **Batch evaluations**: Process multiple parameter sets together
 3. **Pre-allocate arrays**: Reuse output arrays when possible
 4. **Type stability**: Ensure consistent Float64/Float32 usage
@@ -199,29 +196,20 @@ end
 grad = gradient(loss, params)[1]
 ```
 
-### Uncertainty Quantification
-
-For emulators with uncertainty estimates:
-
-```julia
-# Some emulators may provide uncertainty bands
-Cℓ_mean, Cℓ_std = Capse.get_Cℓ_with_uncertainty(params, Cℓ_emu)
-```
-
 ## Python Integration
 
-Use Capse.jl from Python via [pycapse](https://github.com/CosmologicalEmulators/pycapse):
+Use Capse.jl from Python via [jaxcapse](https://github.com/CosmologicalEmulators/jaxcapse):
 
 ```python
-import pycapse
+import jaxcapse
 
 # Load emulator
-emu = pycapse.load_emulator("path/to/weights/")
+emu = jaxcapse.load_emulator("path/to/weights/")
 
 # Evaluate
 import numpy as np
 params = np.array([0.02237, 0.1200, 0.6736, 0.9649, 0.0544, 2.042e-9])
-cl = pycapse.get_cl(params, emu)
+cl = jaxcapse.get_cl(params, emu)
 ```
 
 ## Troubleshooting
@@ -232,21 +220,13 @@ cl = pycapse.get_cl(params, emu)
    - Check parameter count matches emulator expectation
    - Verify with `get_emulator_description()`
 
-2. **Performance issues with Lux in multi-threading**
-   - Known issue: Use distributed computing instead
-   - Or switch to SimpleChains for multi-threaded scenarios
-
-3. **GPU out of memory**
-   - Reduce batch size
-   - Use mixed precision (Float32)
-
-4. **Loading errors**
+2. **Loading errors**
    - Ensure all required files are in weights folder
    - Check file permissions
 
 ## Contributing
 
-We welcome contributions! Please see our [contribution guidelines](https://github.com/CosmologicalEmulators/Capse.jl/blob/main/CONTRIBUTING.md).
+We welcome contributions! Please, feel free to open an issue or submit a pull request.
 
 ### Development Setup
 
@@ -258,14 +238,18 @@ Pkg.test("Capse")
 
 ## Citation
 
-If you use Capse.jl in your research, please cite:
+If you use `Capse.jl` in your research, please cite our release paper:
 
 ```bibtex
-@article{bonici2023capse,
-  title={Capse: efficient and auto-differentiable CMB power spectra emulation},
-  author={Bonici, M. and Bianchini, F. and Ruiz-Zapatero, J.},
-  journal={arXiv preprint arXiv:2307.14339},
-  year={2023}
+@article{Bonici2024Capse,
+	author = {Bonici, Marco and Bianchini, Federico and Ruiz-Zapatero, Jaime},
+	journal = {The Open Journal of Astrophysics},
+	doi = {10.21105/astro.2307.14339},
+	year = {2024},
+	month = {jan 30},
+	publisher = {Maynooth Academic Publishing},
+	title = {Capse.jl: efficient and auto-differentiable {CMB} power spectra emulation},
+	volume = {7},
 }
 ```
 
@@ -282,4 +266,4 @@ MIT License - see [LICENSE](https://github.com/CosmologicalEmulators/Capse.jl/bl
 
 ## Acknowledgments
 
-This work builds upon [AbstractCosmologicalEmulators.jl](https://github.com/CosmologicalEmulators/AbstractCosmologicalEmulators.jl) and benefits from the Julia ML ecosystem including SimpleChains.jl and Lux.jl.
+This work builds upon [`AbstractCosmologicalEmulators.jl`](https://github.com/CosmologicalEmulators/AbstractCosmologicalEmulators.jl) and benefits from the `Julia` ML ecosystem including `SimpleChains.jl` and `Lux.jl`.

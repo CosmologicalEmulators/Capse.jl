@@ -28,7 +28,7 @@ It contains:
 
 - `Postprocessing::Function`, the `Function` used for the postprocessing of the NN output
 """
-@kwdef mutable struct CℓEmulator <: AbstractCℓEmulators
+@kwdef struct CℓEmulator <: AbstractCℓEmulators
     TrainedEmulator::AbstractTrainedEmulators
     ℓgrid::AbstractVector
     InMinMax::AbstractMatrix

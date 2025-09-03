@@ -20,14 +20,14 @@
 
 ## 🚀 High-Performance CMB Power Spectrum Emulation
 
-**Capse.jl** is a cutting-edge Julia package for ultra-fast emulation of Cosmic Microwave Background (CMB) Angular Power Spectra. Using state-of-the-art neural network architectures, Capse.jl delivers cosmological computations **1,000,000× faster** than traditional Boltzmann codes while maintaining research-grade accuracy.
+**`Capse.jl`** is a `Julia` package for ultra-fast emulation of Cosmic Microwave Background (CMB) Angular Power Spectra. `Capse.jl` delivers cosmological computations **1,000,000× faster** than traditional Boltzmann codes while maintaining research-grade accuracy.
 
 ### ✨ Key Features
 
 - **⚡ Lightning Fast**: ~45 microseconds per evaluation (vs ~ seconds for CAMB/CLASS)
-- **🔧 Flexible Backends**: CPU-optimized (SimpleChains) and GPU-ready (Lux)
+- **🔧 Flexible Backends**: CPU-optimized (`SimpleChains`) and GPU-ready (`Lux`)
 - **♻️ Auto-Differentiable**: Full gradient support for modern inference pipelines
-- **🐍 Python Compatible**: Seamless integration via [jaxcapse](https://github.com/CosmologicalEmulators/jaxcapse)
+- **🐍 Python Compatible**: Seamless integration via [`jaxcapse`](https://github.com/CosmologicalEmulators/jaxcapse)
 
 ## 📦 Installation
 
@@ -61,8 +61,8 @@ Cℓ = Capse.get_Cℓ(params, Cℓ_emu)
 
 | Method | Time per Evaluation | Speedup |
 |--------|-------------------|---------|
-| CAMB (high accuracy) | ~60 seconds | 1× |
-| **Capse.jl** | **~45 μs** | **~1,300,000×** |
+| `CAMB` (high accuracy) | ~60 seconds | 1× |
+| **`Capse.jl`** | **~45 μs** | **~1,300,000×** |
 
 </div>
 
@@ -100,7 +100,7 @@ grad = gradient(loss, params)[1]
 
 ## 🐍 Python Integration
 
-Use Capse.jl seamlessly from Python:
+Use `Capse.jl` seamlessly from `Python`:
 
 ```python
 import jaxcapse
@@ -118,7 +118,7 @@ cl = jaxcapse.get_cl(params, emu)
 
 ## 🎓 Citation
 
-If you use Capse.jl in your research, please cite our paper:
+If you use `Capse.jl` in your research, please cite our paper:
 
 ```bibtex
 @article{Bonici2024Capse,

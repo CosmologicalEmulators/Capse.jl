@@ -18,22 +18,12 @@ makedocs(
     authors = "Marco Bonici, Federico Bianchini, Jaime Ruiz-Zapatero, and contributors",
     pages = [
         "Home" => "index.md",
-        "API Reference" => "api.md",
-        "Installation" => [
-            "Quick Start" => "index.md#quick-start",
-            "Requirements" => "index.md#installation"
-        ],
-        "Usage Guide" => [
-            "Basic Usage" => "index.md#basic-usage",
-            "Advanced Features" => "index.md#advanced-usage",
-            "Performance Tips" => "index.md#performance"
-        ],
-        "Python Integration" => "index.md#python-integration",
-        "Troubleshooting" => "index.md#troubleshooting",
-        "Contributing" => "index.md#contributing"
+        "API Reference" => "api.md"
     ]
 )
 
+# Deploy documentation
 deploydocs(
     repo = "github.com/CosmologicalEmulators/Capse.jl.git",
     devbranch = "develop"
+)

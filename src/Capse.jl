@@ -44,6 +44,19 @@ Computes and returns the ``C_\\ell``'s on the ``\\ell``-grid the emulator has be
 
 """
 function get_Cℓ(input_params, Cℓemu::AbstractCℓEmulators)
+    # Validate input dimensions
+    ndims(input_params) > 2 && throw(ArgumentError("Input must be 1D vector or 2D matrix, got $(ndims(input_params))D array"))
+    
+    # Check if input is a vector or matrix and validate dimensions accordingly
+    if ndims(input_params) == 1
+        @assert length(input_params) == size(Cℓemu.InMinMax, 1) "Input dimension mismatch: expected $(size(Cℓemu.InMinMax, 1)) parameters, got $(length(input_params))"
+    else
+        @assert size(input_params, 1) == size(Cℓemu.InMinMax, 1) "Input dimension mismatch: expected $(size(Cℓemu.InMinMax, 1)) parameters per sample, got $(size(input_params, 1))"
+    end
+    
+    # Check for NaN or Inf values
+    any(x -> isnan(x) || isinf(x), input_params) && throw(ArgumentError("Input contains NaN or Inf values"))
+    
     norm_input = maximin(input_params, Cℓemu.InMinMax)
     output = Array(run_emulator(norm_input, Cℓemu.TrainedEmulator))
     norm_output = inv_maximin(output, Cℓemu.OutMinMax)

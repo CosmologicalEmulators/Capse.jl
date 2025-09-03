@@ -14,3 +14,12 @@ AbstractCosmologicalEmulators = "0.6"
 Adapt = "3, 4"
 JSON = "0.21"
 NPZ = "0.4"
+
+[extras]
+NPZ = "15e1cf62-19b3-5cfa-8e77-841668bca605"
+SimpleChains = "de6bee2f-e2f4-4ec7-b6ed-219cc6f6e9e5"
+Static = "aedffcd0-7271-4cad-89d0-dc628f76c6d3"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["NPZ", "SimpleChains", "Static", "Test"]

@@ -25,7 +25,7 @@
 ### ✨ Key Features
 
 - **⚡ Lightning Fast**: ~45 microseconds per evaluation (vs ~ seconds for CAMB/CLASS)
-- **🔧 Flexible Backends**: CPU-optimized (`SimpleChains`) and GPU-ready (`Lux`)
+- **🔧 Flexible Backends**: CPU-optimized (`SimpleChains.jl`) and GPU-ready (`Lux.jl`)
 - **♻️ Auto-Differentiable**: Full gradient support for modern inference pipelines
 - **🐍 Python Compatible**: Seamless integration via [`jaxcapse`](https://github.com/CosmologicalEmulators/jaxcapse)
 
@@ -118,7 +118,7 @@ cl = jaxcapse.get_cl(params, emu)
 
 ## 🎓 Citation
 
-If you use `Capse.jl` in your research, please cite our paper:
+If you use `Capse.jl` in your research, please cite our release paper:
 
 ```bibtex
 @article{Bonici2024Capse,

@@ -11,7 +11,7 @@ NPZ = "15e1cf62-19b3-5cfa-8e77-841668bca605"
 
 [compat]
 julia = "1.10"
-AbstractCosmologicalEmulators = "0.6"
+AbstractCosmologicalEmulators = "0.6, 0.7"
 Adapt = "3, 4"
 JSON = "0.21"
 NPZ = "0.4"

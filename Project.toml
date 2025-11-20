@@ -1,7 +1,7 @@
 name = "Capse"
 uuid = "994f66c3-d2c7-4ba6-88fb-4a10f50800ba"
 authors = ["marcobonici <bonici.marco@gmail.com>"]
-version = "0.3.5"
+version = "0.3.6"
 
 [deps]
 AbstractCosmologicalEmulators = "c83c1981-e5c4-4837-9eb8-c9b1572acfc6"
@@ -11,9 +11,9 @@ NPZ = "15e1cf62-19b3-5cfa-8e77-841668bca605"
 
 [compat]
 julia = "1.10"
-AbstractCosmologicalEmulators = "0.6"
+AbstractCosmologicalEmulators = "0.7"
 Adapt = "3, 4"
-JSON = "0.21"
+JSON = "1"
 NPZ = "0.4"
 
 [extras]

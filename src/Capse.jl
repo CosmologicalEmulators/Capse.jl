@@ -9,6 +9,12 @@ import NPZ: npzread
 
 export get_Cℓ
 
+# Lensing functions live directly in Capse (no submodule)
+include("Lensing.jl")
+export gauss_legendre_weights, wigner_d_matrix
+export d00, d1n, d2n, d3n, d4n
+export LensingConfig, lensed_Cls
+
 abstract type AbstractCℓEmulators end
 
 """
@@ -88,17 +94,17 @@ See also: [`load_emulator`](@ref), [`get_ℓgrid`](@ref), [`get_emulator_descrip
 function get_Cℓ(input_params, Cℓemu::AbstractCℓEmulators)
     # Validate input dimensions
     ndims(input_params) > 2 && throw(ArgumentError("Input must be 1D vector or 2D matrix, got $(ndims(input_params))D array"))
-    
+
     # Check if input is a vector or matrix and validate dimensions accordingly
     if ndims(input_params) == 1
         @assert length(input_params) == size(Cℓemu.InMinMax, 1) "Input dimension mismatch: expected $(size(Cℓemu.InMinMax, 1)) parameters, got $(length(input_params))"
     else
         @assert size(input_params, 1) == size(Cℓemu.InMinMax, 1) "Input dimension mismatch: expected $(size(Cℓemu.InMinMax, 1)) parameters per sample, got $(size(input_params, 1))"
     end
-    
+
     # Check for NaN or Inf values
     any(x -> isnan(x) || isinf(x), input_params) && throw(ArgumentError("Input contains NaN or Inf values"))
-    
+
     norm_input = maximin(input_params, Cℓemu.InMinMax)
     output = Array(run_emulator(norm_input, Cℓemu.TrainedEmulator))
     norm_output = inv_maximin(output, Cℓemu.OutMinMax)
@@ -241,25 +247,25 @@ get_emulator_description(emulator)
 
 See also: [`get_Cℓ`](@ref), [`get_emulator_description`](@ref), [`CℓEmulator`](@ref)
 """
-function load_emulator(path::String; emu = SimpleChainsEmulator,
-    ℓ_file = "l.npy", weights_file = "weights.npy", inminmax_file = "inminmax.npy",
-    outminmax_file = "outminmax.npy", nn_setup_file = "nn_setup.json",
-    postprocessing_file = "postprocessing.jl")
-    
+function load_emulator(path::String; emu=SimpleChainsEmulator,
+    ℓ_file="l.npy", weights_file="weights.npy", inminmax_file="inminmax.npy",
+    outminmax_file="outminmax.npy", nn_setup_file="nn_setup.json",
+    postprocessing_file="postprocessing.jl")
+
     # Ensure path ends with /
     path = endswith(path, "/") ? path : path * "/"
-    
-    NN_dict = parsefile(path*nn_setup_file)
-    ℓ = npzread(path*ℓ_file)
 
-    weights = npzread(path*weights_file)
+    NN_dict = parsefile(path * nn_setup_file)
+    ℓ = npzread(path * ℓ_file)
+
+    weights = npzread(path * weights_file)
     trained_emu = Capse.init_emulator(NN_dict, weights, emu)
     Cℓ_emu = Capse.CℓEmulator(
-        TrainedEmulator = trained_emu, 
-        ℓgrid = ℓ,
-        InMinMax = npzread(path*inminmax_file),
-        OutMinMax = npzread(path*outminmax_file),
-        Postprocessing = include(path*postprocessing_file)
+        TrainedEmulator=trained_emu,
+        ℓgrid=ℓ,
+        InMinMax=npzread(path * inminmax_file),
+        OutMinMax=npzread(path * outminmax_file),
+        Postprocessing=include(path * postprocessing_file)
     )
     return Cℓ_emu
 end

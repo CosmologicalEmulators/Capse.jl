@@ -6,15 +6,23 @@ version = "0.3.7"
 [deps]
 AbstractCosmologicalEmulators = "c83c1981-e5c4-4837-9eb8-c9b1572acfc6"
 Adapt = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+FastGaussQuadrature = "442a2c76-b920-505d-bb47-c5924d526838"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+LoopVectorization = "bdcacae8-1622-11e9-2a5c-532679323890"
 NPZ = "15e1cf62-19b3-5cfa-8e77-841668bca605"
 
 [compat]
-julia = "1.10"
 AbstractCosmologicalEmulators = "0.8"
 Adapt = "3, 4"
+BenchmarkTools = "1.6.3"
+FastGaussQuadrature = "1.1"
 JSON = "1"
+LinearAlgebra = "1.11.0"
+LoopVectorization = "0.12.173"
 NPZ = "0.4"
+julia = "1.10"
 
 [extras]
 NPZ = "15e1cf62-19b3-5cfa-8e77-841668bca605"

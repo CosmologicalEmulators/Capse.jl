@@ -11,6 +11,7 @@ using the angular correlation function approach.
 using FastGaussQuadrature: gausslegendre
 using LinearAlgebra: mul!, lmul!
 using LoopVectorization: @turbo, @tturbo
+using Base.Threads: @threads, nthreads, threadid
 
 # ---------------------------------------------------------------------------
 # 1. Gauss-Legendre quadrature nodes
@@ -302,15 +303,23 @@ function lensed_Cls(ClTT_unl::AbstractVector,
         es2_25[i] = exp(2.5 * s2)
     end
 
-    # ── Step 2: Accumulate ξ, ξ₊, ξ₋, ξ× in a single pass over ells ─────────
-    # Working buffers of size (Nmu,) only — no (Nmu×Nell) intermediates
-    ksi = zeros(Float64, Nmu)
-    ksip = zeros(Float64, Nmu)
-    ksim = zeros(Float64, Nmu)
-    ksix = zeros(Float64, Nmu)
+    # ── Step 2: Accumulate ξ, ξ₊, ξ₋, ξ× — threaded outer loop ─────────────
+    # Each thread accumulates into its own private (Nmu,) buffers, then we
+    # reduce across threads at the end.  No race conditions; @turbo SIMD
+    # inside each thread's j-slice is preserved.
+    nt = nthreads()
+    ksi_t = [zeros(Float64, Nmu) for _ in 1:nt]
+    ksip_t = [zeros(Float64, Nmu) for _ in 1:nt]
+    ksim_t = [zeros(Float64, Nmu) for _ in 1:nt]
+    ksix_t = [zeros(Float64, Nmu) for _ in 1:nt]
 
-    @inbounds for j in 1:Nell
-        lp1 = llp1[j]
+    @threads :static for j in 1:Nell
+        tid = threadid()
+        _ksi = ksi_t[tid]
+        _ksip = ksip_t[tid]
+        _ksim = ksim_t[tid]
+        _ksix = ksix_t[tid]
+
         tl1 = two_l1[j]
         ClT = Float64(ClTT_unl[j])
         ClE = Float64(ClEE_unl[j])
@@ -320,22 +329,18 @@ function lensed_Cls(ClTT_unl::AbstractVector,
         a132 = s132[j]
         a242 = s242[j]
         islp1 = inv_slp1[j]
-
         f0 = f0_vals[j]
         f4 = f4_vals[j]
         i8lp1 = i8lp1_vals[j]
 
         @turbo for i in 1:Nmu
-            s2 = sigma2[i]
             c2 = Cgl2[i]
-
+            s2 = sigma2[i]
             x0 = exp(-f0 * s2)
             x0p = -f0 * x0
-
-            # Using precomputed exponentials
-            x220 = a220 * x0 * es2_05[i]
             x022 = x0 * es2_1[i]
             x22p = -f4 * x022
+            x220 = a220 * x0 * es2_05[i]
             x121 = a121 * x0 * es2_23[i]
             x132 = a132 * x0 * es2_53[i]
             x242 = a242 * x0 * es2_25[i]
@@ -348,26 +353,34 @@ function lensed_Cls(ClTT_unl::AbstractVector,
             x242_2 = x242 * x242
             c2_2 = c2 * c2
 
-            ksi[i] += tl1 * ClT * (
-                          x0_2 * D00[i, j] +
-                          i8lp1 * c2 * x0p_2 * D1m1[i, j] +
-                          c2_2 * (x0p_2 * D00[i, j] + x220_2 * D2m2[i, j]))
+            _ksi[i] += tl1 * ClT * (
+                           x0_2 * D00[i, j] + i8lp1 * c2 * x0p_2 * D1m1[i, j] +
+                           c2_2 * (x0p_2 * D00[i, j] + x220_2 * D2m2[i, j]))
 
-            ksip[i] += tl1 * ClE * (
-                           x022_2 * D22[i, j] +
-                           2c2 * x132 * x121 * D31[i, j] +
-                           c2_2 * (x22p_2 * D22[i, j] + x242 * x220 * D40[i, j]))
+            _ksip[i] += tl1 * ClE * (
+                            x022_2 * D22[i, j] + 2c2 * x132 * x121 * D31[i, j] +
+                            c2_2 * (x22p_2 * D22[i, j] + x242 * x220 * D40[i, j]))
 
-            ksim[i] += tl1 * ClE * (
-                           x022_2 * D2m2[i, j] +
-                           c2 * (x121 * x121 * D1m1[i, j] + x132 * x132 * D3m3[i, j]) +
-                           0.5 * c2_2 * (2x22p_2 * D2m2[i, j] + x220_2 * D00[i, j] + x242_2 * D4m4[i, j]))
+            _ksim[i] += tl1 * ClE * (
+                            x022_2 * D2m2[i, j] + c2 * (x121 * x121 * D1m1[i, j] + x132 * x132 * D3m3[i, j]) +
+                            0.5 * c2_2 * (2x22p_2 * D2m2[i, j] + x220_2 * D00[i, j] + x242_2 * D4m4[i, j]))
 
-            ksix[i] += tl1 * ClX * (
-                           x022 * x0 * D20[i, j] +
-                           2c2 * x0p * islp1 * (x121 * D11[i, j] + x132 * D3m1[i, j]) +
-                           0.5 * c2_2 * ((2x22p * x0p + x220_2) * D20[i, j] + x220 * x242 * D4m2[i, j]))
+            _ksix[i] += tl1 * ClX * (
+                            x022 * x0 * D20[i, j] + 2c2 * x0p * islp1 * (x121 * D11[i, j] + x132 * D3m1[i, j]) +
+                            0.5 * c2_2 * ((2x22p * x0p + x220_2) * D20[i, j] + x220 * x242 * D4m2[i, j]))
         end
+    end
+
+    # Reduce thread-local buffers
+    ksi = ksi_t[1]
+    ksip = ksip_t[1]
+    ksim = ksim_t[1]
+    ksix = ksix_t[1]
+    for t in 2:nt
+        @. ksi += ksi_t[t]
+        @. ksip += ksip_t[t]
+        @. ksim += ksim_t[t]
+        @. ksix += ksix_t[t]
     end
 
     lmul!(inv4pi, ksi)

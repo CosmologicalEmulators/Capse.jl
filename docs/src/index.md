@@ -46,6 +46,17 @@ Cℓ = Capse.get_Cℓ(params, Cℓ_emu)
 
 ## Detailed Guide
 
+### Interpolation
+
+`Capse.jl` supports rapid and exact interpolation between the emulator's natively trained `ℓgrid` and an arbitrary user-defined `ℓgrid` via precomputed FFT plans using Chebyshev polynomials.
+
+```@docs
+Capse.ChebyshevInterpolPlan
+Capse.prepare_Cℓ_interpolation
+Capse.interp_Cℓ(::AbstractVector, ::Capse.ChebyshevInterpolPlan)
+Capse.interp_Cℓ(::AbstractMatrix, ::Capse.ChebyshevInterpolPlan)
+```
+
 ### Loading Emulators
 
 `Capse.jl` supports loading pre-trained emulators from disk. Trained weights are available on [Zenodo](https://zenodo.org/record/8187935).

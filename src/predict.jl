@@ -56,12 +56,8 @@ function get_Cℓ(input_params, Cℓemu::AbstractCℓEmulators)
     return Cℓemu.Postprocessing(input_params, norm_output, Cℓemu)
 end
 
-"""
-    get_emulator_output(input_params, Cℓemu::AbstractCℓEmulators) -> Vector or Matrix
-
-Internal helper: run the neural network and invert normalisation, but skip postprocessing.
-Useful for testing and for the one-shot `get_Cℓ(input_params, emu, plan)` method.
-"""
+# Internal helper: run the neural network and invert normalisation, but skip postprocessing.
+# Used by tests and by the one-shot get_Cℓ(input_params, emu, plan) method.
 function get_emulator_output(input_params, Cℓemu::AbstractCℓEmulators)
     norm_input  = maximin(input_params, Cℓemu.InMinMax)
     output      = Array(run_emulator(norm_input, Cℓemu.TrainedEmulator))

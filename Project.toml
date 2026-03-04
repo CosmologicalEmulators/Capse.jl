@@ -6,12 +6,14 @@ authors = ["Marco Bonici <bonici.marco@gmail.com>"]
 [deps]
 AbstractCosmologicalEmulators = "c83c1981-e5c4-4837-9eb8-c9b1572acfc6"
 Adapt = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
+Artifacts = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 NPZ = "15e1cf62-19b3-5cfa-8e77-841668bca605"
 
 [compat]
 AbstractCosmologicalEmulators = "0.9"
 Adapt = "3, 4"
+Artifacts = "1.11.0"
 DifferentiationInterface = "0.7.16"
 ForwardDiff = "1.3.2"
 JSON = "1"

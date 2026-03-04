@@ -3,7 +3,7 @@ module Capse
 using Base: @kwdef
 using Adapt
 using AbstractCosmologicalEmulators
-import AbstractCosmologicalEmulators: get_emulator_description, AbstractCℓEmulators, AbstractTrainedEmulators
+import AbstractCosmologicalEmulators: get_emulator_description, AbstractTrainedEmulators
 import JSON: parsefile
 import NPZ: npzread
 

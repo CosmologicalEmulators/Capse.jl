@@ -1,5 +1,7 @@
-@kwdef struct CℓEmulator <: AbstractCosmologicalEmulators.AbstractCℓEmulators
-    TrainedEmulator::AbstractCosmologicalEmulators.AbstractTrainedEmulators
+abstract type AbstractCℓEmulators end
+
+@kwdef struct CℓEmulator <: AbstractCℓEmulators
+    TrainedEmulator::AbstractTrainedEmulators
     ℓgrid::AbstractVector
     InMinMax::AbstractMatrix
     OutMinMax::AbstractMatrix
@@ -9,7 +11,7 @@ end
 Adapt.@adapt_structure CℓEmulator
 
 """
-    get_ℓgrid(Cℓemu::AbstractCosmologicalEmulators.AbstractCℓEmulators) -> AbstractVector
+    get_ℓgrid(Cℓemu::AbstractCℓEmulators) -> AbstractVector
 
 Return the ℓ-grid associated with the given emulator.
 
@@ -24,6 +26,6 @@ Return the ℓ-grid associated with the given emulator.
 ℓ_grid = get_ℓgrid(emulator)
 ```
 """
-function AbstractCosmologicalEmulators.get_ℓgrid(Cℓemu::AbstractCosmologicalEmulators.AbstractCℓEmulators)
+function AbstractCosmologicalEmulators.get_ℓgrid(Cℓemu::AbstractCℓEmulators)
     return Cℓemu.ℓgrid
 end

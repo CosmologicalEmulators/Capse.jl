@@ -1,4 +1,3 @@
-using AbstractCosmologicalEmulators: get_ℓgrid
 using FastChebyshev
 import FastChebyshev: ChebyshevPlan
 

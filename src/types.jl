@@ -26,6 +26,6 @@ Return the ℓ-grid associated with the given emulator.
 ℓ_grid = get_ℓgrid(emulator)
 ```
 """
-function AbstractCosmologicalEmulators.get_ℓgrid(Cℓemu::AbstractCℓEmulators)
+function get_ℓgrid(Cℓemu::AbstractCℓEmulators)
     return Cℓemu.ℓgrid
 end

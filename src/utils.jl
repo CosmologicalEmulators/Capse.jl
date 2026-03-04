@@ -15,15 +15,26 @@ Prints to stdout:
 
 # Returns
 - `nothing` (information is printed to stdout)
+
+!!! warning
+    Always check parameter ordering before using an emulator, as different
+    training configurations may expect parameters in different orders.
+
+See also: [`load_emulator`](@ref), [`get_Cℓ`](@ref)
 """
-function AbstractCosmologicalEmulators.get_emulator_description(Cℓemu::AbstractCℓEmulators)
-    println(Cℓemu.TrainedEmulator.Description)
+function get_emulator_description(Cℓemu::AbstractCℓEmulators)
+    if haskey(Cℓemu.TrainedEmulator.Description, "emulator_description")
+        get_emulator_description(Cℓemu.TrainedEmulator)
+    else
+        @warn "No emulator description found!"
+    end
+    return nothing
 end
 
 """
     load_emulator(path::String; kwargs...) -> CℓEmulator
 
-Load a pre-trained `CℓEmulator` from disk.
+Load a pre-trained CMB power spectrum emulator from disk.
 
 # Arguments
 - `path::String`: Directory path containing the emulator files (must end with '/')
@@ -36,35 +47,23 @@ Load a pre-trained `CℓEmulator` from disk.
 - `weights_file::String = "weights.npy"`: Filename for network weights
 - `inminmax_file::String = "inminmax.npy"`: Filename for input normalization
 - `outminmax_file::String = "outminmax.npy"`: Filename for output normalization
-- `nn_setup_file::String = "nn_setup.json"`: Filename for network architecture definition
-- `postprocessing_file::String = "postprocessing.jl"`: Filename for postprocessing script (falls back to Python default logic if `.jl` missing)
+- `nn_setup_file::String = "nn_setup.json"`: Filename for network architecture
+- `postprocessing_file::String = "postprocessing.jl"`: Filename for post-processing function
 
-# Example
+# Returns
+- `CℓEmulator`: Loaded emulator ready for inference
+
+# Examples
 ```julia
-using Capse
+# Basic loading
+emulator = load_emulator("/path/to/weights/")
 
-# Load default configuration
-emulator = load_emulator("path/to/weights/")
-
-# Load with specific backend and custom files
-emulator = load_emulator("path/to/weights/", 
-    emu = LuxEmulator,
-    ℓ_file = "multipoles.npy"
-)
-
-# Check what was loaded
-get_emulator_description(emulator)
+# Use GPU backend
+using Lux
+emulator = load_emulator("/path/to/weights/", emu=LuxEmulator)
 ```
 
-# Errors
-- `SystemError`: If path doesn't exist or files are missing
-- `LoadError`: If files are corrupted or incompatible
-
-!!! tip
-    Pre-trained emulators are available on [Zenodo](https://zenodo.org/record/8187935).
-    Download and extract the weights folder, then load with this function.
-
-See also: [`get_Cℓ`](@ref), [`get_emulator_description`](@ref), [`get_ℓgrid`](@ref)
+See also: [`get_Cℓ`](@ref), [`get_emulator_description`](@ref), [`CℓEmulator`](@ref)
 """
 function load_emulator(path::String; emu = SimpleChainsEmulator,
     ℓ_file = "l.npy", weights_file = "weights.npy", inminmax_file = "inminmax.npy",
@@ -79,21 +78,12 @@ function load_emulator(path::String; emu = SimpleChainsEmulator,
 
     weights = npzread(path*weights_file)
     trained_emu = Capse.init_emulator(NN_dict, weights, emu)
-    
-    postproc_path = path*postprocessing_file
-    postproc_obj = if isfile(postproc_path)
-        include(postproc_path)
-    else
-        # Fallback to the known py version if no .jl is present in the archive
-        (input, output, Cℓemu) -> output .* exp(input[1] - 3.0)
-    end
-    
     Cℓ_emu = Capse.CℓEmulator(
         TrainedEmulator = trained_emu, 
         ℓgrid = ℓ,
         InMinMax = npzread(path*inminmax_file),
         OutMinMax = npzread(path*outminmax_file),
-        Postprocessing = postproc_obj
+        Postprocessing = include(path*postprocessing_file)
     )
     return Cℓ_emu
 end

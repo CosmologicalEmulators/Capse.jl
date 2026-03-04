@@ -3,18 +3,17 @@ module Capse
 using Base: @kwdef
 using Adapt
 using AbstractCosmologicalEmulators
-import AbstractCosmologicalEmulators: get_emulator_description, AbstractTrainedEmulators
+import AbstractCosmologicalEmulators: get_emulator_description
 import JSON: parsefile
 import NPZ: npzread
+using Artifacts
 
 export get_Cℓ
 export ChebyshevInterpolPlan, prepare_Cℓ_interpolation, interp_Cℓ
 
-using Artifacts
-
 include("types.jl")
-include("predict.jl")
 include("interpolation.jl")
+include("predict.jl")
 include("utils.jl")
 
 function __init__()

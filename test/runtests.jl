@@ -70,6 +70,31 @@ end
     Cℓ_interp_desc = interp_Cℓ(Cℓ_true_desc, plan_desc)
     @test length(Cℓ_interp_desc) == 100
     @test isapprox(Cℓ_interp_desc, Cℓ_exact; rtol=1e-10)
+
+    # Test combined interpolation method (get_Cℓ with plan)
+    # For this test, we'll use the existing `capse_emu` and `cosmo` from the "Capse tests" block
+    # and define a new target ℓ-grid.
+    local cosmo = ones(6) # Use local to avoid conflict if defined elsewhere
+    local emu_for_interp = Capse.CℓEmulator(TrainedEmulator = capse_emu.TrainedEmulator, ℓgrid=ℓ_cheb_desc, 
+                                            InMinMax = inminmax, OutMinMax = outminmax, Postprocessing = postprocessing)
+    local plan_for_interp = prepare_Cℓ_interpolation(emu_for_interp, ℓ_new)
+
+    # Get raw emulator output (before postprocessing and interpolation)
+    Cℓ_pred_raw = Capse.get_emulator_output(cosmo, emu_for_interp)
+    # Apply postprocessing manually
+    Cℓ_pred = emu_for_interp.Postprocessing(cosmo, Cℓ_pred_raw, emu_for_interp)
+
+    # Interpolate using `interp_Cℓ`
+    Cℓ_interp = interp_Cℓ(Cℓ_pred, plan_for_interp)
+    
+    # Interpolate using the one-shot `get_Cℓ` method
+    Cℓ_oneshot = Capse.get_Cℓ(cosmo, emu_for_interp, plan_for_interp)
+    
+    # Check shape
+    @test length(Cℓ_interp) == length(ℓ_new)
+    
+    # Check that the two methods yield the exact same result
+    @test Cℓ_interp ≈ Cℓ_oneshot
     
     # 2. Ascending grid
     ℓ_cheb_asc = reverse(ℓ_cheb_desc)
@@ -133,4 +158,20 @@ end
             @test all(isfinite, g_mat)
         end
     end
+end
+
+@testset "Bundled Emulators" begin
+    @test haskey(Capse.trained_emulators, "CAMB_LCDM")
+    @test haskey(Capse.trained_emulators["CAMB_LCDM"], "TT")
+    
+    # Check that we can get one of them successfully and run it
+    emu_tt = Capse.trained_emulators["CAMB_LCDM"]["TT"]
+    @test emu_tt isa Capse.CℓEmulator
+    
+    # Provide dummy parameters for LCDM (6 params)
+    params = [0.022, 0.12, 67.0, 0.96, 0.05, 2.1e-9]
+    Cℓ = Capse.get_Cℓ(params, emu_tt)
+    
+    @test length(Cℓ) > 0
+    @test all(isfinite, Cℓ)
 end

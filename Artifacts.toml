@@ -1,0 +1,6 @@
+[CAMB_LCDM]
+git-tree-sha1 = "f8b98ff916e0bcb01369d30aaff6620f79c84168"
+
+    [[CAMB_LCDM.download]]
+    sha256 = "929dfcc6880cdb0f966a71cc712214110fc3aefa5cbac456399d72af45a3e2d7"
+    url = "https://zenodo.org/records/18856499/files/trained_emu.tar.xz"

@@ -58,26 +58,11 @@ function get_Cℓ(input_params, Cℓemu::AbstractCℓEmulators)
 end
 
 # Internal helper: run the neural network and invert normalisation, but skip postprocessing.
-# Used by tests and by the one-shot get_Cℓ(input_params, emu, plan) method.
+# Used by tests and interpolation diagnostics.
 function get_emulator_output(input_params, Cℓemu::AbstractCℓEmulators)
     norm_input  = maximin(input_params, Cℓemu.InMinMax)
     output      = Array(run_emulator(norm_input, Cℓemu.TrainedEmulator))
     return inv_maximin(output, Cℓemu.OutMinMax)
-end
-
-"""
-    get_Cℓ(input_params, Cℓemu::AbstractCℓEmulators, plan::ChebyshevInterpolPlan)
-
-One-shot convenience method: evaluate the emulator **and** interpolate onto the
-target ℓ-grid baked into `plan`.
-
-# Returns
-- `Vector` (or `Matrix` for batched `input_params`) on the target ℓ-grid.
-"""
-function get_Cℓ(input_params, Cℓemu::AbstractCℓEmulators, plan::ChebyshevInterpolPlan)
-    norm_output = get_emulator_output(input_params, Cℓemu)
-    Cℓ_pp = Cℓemu.Postprocessing(input_params, norm_output, Cℓemu)
-    return interp_Cℓ(Cℓ_pp, plan)
 end
 
 """

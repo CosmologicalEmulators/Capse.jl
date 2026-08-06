@@ -48,8 +48,6 @@ Cℓ = Capse.get_Cℓ(params, Cℓ_emu)
 
 ### Interpolation
 
-`Capse.jl` supports rapid and exact interpolation between the emulator's natively trained `ℓgrid` and an arbitrary user-defined `ℓgrid` via precomputed FFT plans using Chebyshev polynomials.
-
 For emulators trained on a subsampled multipole grid, loading prepares a
 `SplinePlan` backed by a cubic spline. Interpolation is transparent:
 
@@ -65,10 +63,9 @@ default. Source bounds within 0.1 of an integer are snapped to that integer;
 other bounds are moved inward to avoid extrapolation.
 
 ```@docs
-Capse.ChebyshevInterpolPlan
-Capse.prepare_Cℓ_interpolation
-Capse.interp_Cℓ(::AbstractVector, ::Capse.ChebyshevInterpolPlan)
-Capse.interp_Cℓ(::AbstractMatrix, ::Capse.ChebyshevInterpolPlan)
+Capse.SplinePlan
+Capse.prepare_interpolation_method
+Capse.interp_Cℓ
 ```
 
 ### Loading Emulators

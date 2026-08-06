@@ -8,7 +8,7 @@ import NPZ: npzread
 using Artifacts
 
 export get_Cℓ, get_ℓgrid, get_training_ℓgrid
-export SplinePlan, ChebyshevInterpolPlan, prepare_Cℓ_interpolation, interp_Cℓ
+export SplinePlan, prepare_interpolation_method, interp_Cℓ
 
 include("types.jl")
 include("interpolation.jl")

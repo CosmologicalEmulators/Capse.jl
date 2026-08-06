@@ -10,7 +10,7 @@ Compute CMB angular power spectrum ``C_ℓ`` for given cosmological parameters.
 - `Cℓemu::AbstractCℓEmulators`: The emulator instance
 
 # Returns
-- `Vector{Float64}`: Power spectrum values on the emulator's ℓ-grid (single evaluation)
+- `Vector{Float64}`: Power spectrum values on `get_ℓgrid(Cℓemu)`
 - `Matrix{Float64}`: Power spectra where each column is one spectrum (batch evaluation)
 
 # Throws
@@ -53,7 +53,8 @@ function get_Cℓ(input_params, Cℓemu::AbstractCℓEmulators)
     norm_input = maximin(input_params, Cℓemu.InMinMax)
     output = Array(run_emulator(norm_input, Cℓemu.TrainedEmulator))
     norm_output = inv_maximin(output, Cℓemu.OutMinMax)
-    return Cℓemu.Postprocessing(input_params, norm_output, Cℓemu)
+    processed_output = Cℓemu.Postprocessing(input_params, norm_output, Cℓemu)
+    return Cℓemu.InterpolationMethod(processed_output)
 end
 
 # Internal helper: run the neural network and invert normalisation, but skip postprocessing.
@@ -82,7 +83,7 @@ end
 """
     get_ℓgrid(CℓEmulator::AbstractCℓEmulators) -> AbstractVector
 
-Return the multipole moments (ℓ values) on which the emulator was trained.
+Return the multipole grid corresponding to the values returned by `get_Cℓ`.
 
 # Arguments
 - `CℓEmulator::AbstractCℓEmulators`: The emulator instance
@@ -100,5 +101,10 @@ println("Number of multipoles: ", length(ℓ_values))
 See also: [`get_Cℓ`](@ref), [`CℓEmulator`](@ref)
 """
 function get_ℓgrid(CℓEmulator::AbstractCℓEmulators)
-    return CℓEmulator.ℓgrid
+    return CℓEmulator.PredictionℓGrid
+end
+
+"""Return the multipole grid used while training the emulator."""
+function get_training_ℓgrid(CℓEmulator::AbstractCℓEmulators)
+    return CℓEmulator.TrainingℓGrid
 end

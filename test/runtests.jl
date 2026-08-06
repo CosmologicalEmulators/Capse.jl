@@ -3,7 +3,7 @@ using NPZ
 using SimpleChains
 using Static
 using Capse
-using AbstractCosmologicalEmulators: chebpoints
+using AbstractCosmologicalEmulators: AkimaSplinePlan, CubicSplinePlan, chebpoints
 using DifferentiationInterface
 import ForwardDiff, Zygote, Mooncake
 
@@ -39,7 +39,9 @@ capse_loaded_emu = Capse.load_emulator("emu/")
     output = Capse.get_Cℓ(cosmo,  capse_emu)
     output_vec = Capse.get_Cℓ(cosmo_vec, capse_emu)
     @test isapprox(output_vec[:,1], output)
-    @test ℓ_test == Capse.get_ℓgrid(capse_emu)
+    @test Capse.get_training_ℓgrid(capse_emu) == ℓ_test
+    @test Capse.get_ℓgrid(capse_emu) == collect(0:200)
+    @test length(output) == length(Capse.get_ℓgrid(capse_emu))
     @test_logs (:warn, "No emulator description found!") Capse.get_emulator_description(capse_emu)
     @test Capse.get_Cℓ(cosmo_vec, capse_emu) == Capse.get_Cℓ(cosmo_vec, capse_loaded_emu)
 end
@@ -160,6 +162,116 @@ end
     end
 end
 
+@testset "Dense spline prediction" begin
+    ℓ_sparse = [2.0, 3.5, 7.0, 12.0, 20.0]
+    ℓ_dense = collect(2:20)
+    values_1 = @. exp(-ℓ_sparse / 10) * (1 + 0.1 * sin(ℓ_sparse))
+    values_2 = @. cos(ℓ_sparse / 7) + 0.2 * sin(ℓ_sparse / 3)
+    values_matrix = hcat(values_1, values_2)
+
+    plan = SplinePlan(ℓ_sparse)
+    @test plan.Plan isa CubicSplinePlan
+    @test plan.SourceAscending
+    @test plan.PredictionℓGrid == ℓ_dense
+    @test plan(values_1) ≈ CubicSplinePlan(ℓ_sparse, ℓ_dense)(values_1) atol=1e-14
+    @test plan(values_matrix) ≈ CubicSplinePlan(ℓ_sparse, ℓ_dense)(values_matrix) atol=1e-14
+    @test size(plan(values_matrix)) == (length(ℓ_dense), 2)
+    @test @inferred(plan(values_1)) ≈ plan(values_1)
+
+    plan_descending = SplinePlan(reverse(ℓ_sparse))
+    @test !plan_descending.SourceAscending
+    @test plan_descending(reverse(values_1)) ≈ plan(values_1) atol=1e-14
+    @test plan_descending(reverse(values_matrix; dims=1)) ≈ plan(values_matrix) atol=1e-14
+
+    akima_plan = SplinePlan(ℓ_sparse; plan_type=AkimaSplinePlan)
+    @test akima_plan.Plan isa AkimaSplinePlan
+    @test akima_plan(values_1) ≈ AkimaSplinePlan(ℓ_sparse, ℓ_dense)(values_1) atol=1e-14
+
+    identity_plan = Capse.prepare_interpolation_method(collect(2:20))
+    dense_values = @. exp(-ℓ_dense / 10)
+    dense_values_matrix = hcat(dense_values, 2 .* dense_values)
+    @test identity_plan(dense_values) === dense_values
+    @test identity_plan(dense_values_matrix) === dense_values_matrix
+
+    oversized_grid = collect(range(2.0, 5000.0; length=2049))
+    oversized_method = Capse.prepare_interpolation_method(oversized_grid)
+    @test oversized_method isa Capse.IdentityInterpolation
+    @test Capse.prepare_interpolation_method(ℓ_sparse; interpolation=:none) isa
+          Capse.IdentityInterpolation
+    @test Capse.prepare_interpolation_method(
+        oversized_grid;
+        interpolation=:cubic,
+    ) isa SplinePlan
+
+    @test_throws ArgumentError SplinePlan([2.0])
+    @test_throws ArgumentError SplinePlan([2.0, 5.0, 4.0, 10.0])
+    @test SplinePlan([2.0001, 5.0, 9.999]).PredictionℓGrid == collect(2:10)
+    @test SplinePlan([2.999, 5.0, 9.999]).PredictionℓGrid == collect(3:10)
+    @test SplinePlan([2.101, 5.0, 9.899]).PredictionℓGrid == collect(3:9)
+    @test SplinePlan([2.5, 5.0, 10.5]).PredictionℓGrid == collect(3:10)
+    @test_throws ArgumentError SplinePlan(
+        [2.0, 5.0, 10.0];
+        endpoint_tolerance=0.5,
+    )
+
+    n_first_kind = 512
+    first_kind_grid = sort(
+        @. 4501.0 + 4499.0 * cos(
+            (2 * (1:n_first_kind) - 1) * π / (2 * n_first_kind)
+        )
+    )
+    @test SplinePlan(first_kind_grid).PredictionℓGrid == collect(2:9000)
+
+    cosmo = ones(6)
+    cosmo_batch = ones(6, 3)
+    raw_prediction = Capse.get_emulator_output(cosmo, capse_emu)
+    sparse_prediction = capse_emu.Postprocessing(cosmo, raw_prediction, capse_emu)
+    dense_prediction = get_Cℓ(cosmo, capse_emu)
+    @test get_training_ℓgrid(capse_emu) == ℓ_test
+    @test get_ℓgrid(capse_emu) == collect(0:200)
+    @test length(dense_prediction) == 201
+    @test dense_prediction ≈ capse_emu.InterpolationMethod(sparse_prediction) atol=1e-14
+
+    dense_batch = get_Cℓ(cosmo_batch, capse_emu)
+    @test size(dense_batch) == (201, 3)
+    raw_batch = Capse.get_emulator_output(cosmo_batch, capse_emu)
+    sparse_batch = capse_emu.Postprocessing(cosmo_batch, raw_batch, capse_emu)
+    @test dense_batch ≈ capse_emu.InterpolationMethod(sparse_batch) atol=1e-14
+
+    loaded_dense_prediction = get_Cℓ(cosmo, capse_loaded_emu)
+    @test loaded_dense_prediction ≈ dense_prediction atol=1e-14
+    @test capse_loaded_emu.InterpolationMethod.Plan isa CubicSplinePlan
+
+    second_cosmo = fill(0.9, 6)
+    @test get_Cℓ(second_cosmo, capse_emu) != dense_prediction
+
+    for backend in (
+        AutoForwardDiff(),
+        AutoZygote(),
+        AutoMooncake(config=nothing),
+    )
+        vector_loss = x -> sum(plan(x))
+        matrix_loss = x -> sum(plan(x))
+        vector_gradient = DifferentiationInterface.gradient(vector_loss, backend, values_1)
+        matrix_gradient = DifferentiationInterface.gradient(matrix_loss, backend, values_matrix)
+        @test all(isfinite, vector_gradient)
+        @test all(isfinite, matrix_gradient)
+        @test size(vector_gradient) == size(values_1)
+        @test size(matrix_gradient) == size(values_matrix)
+    end
+
+    for backend in (AutoForwardDiff(), AutoZygote())
+        dense_prediction_loss = x -> sum(get_Cℓ(x, capse_emu))
+        dense_prediction_gradient = DifferentiationInterface.gradient(
+            dense_prediction_loss,
+            backend,
+            cosmo,
+        )
+        @test all(isfinite, dense_prediction_gradient)
+        @test size(dense_prediction_gradient) == size(cosmo)
+    end
+end
+
 @testset "Bundled Emulators" begin
     @test haskey(Capse.trained_emulators, "CAMB_LCDM")
     @test haskey(Capse.trained_emulators["CAMB_LCDM"], "TT")
@@ -174,4 +286,8 @@ end
     
     @test length(Cℓ) > 0
     @test all(isfinite, Cℓ)
+    @test emu_tt.InterpolationMethod isa Capse.IdentityInterpolation
+    @test Capse.get_training_ℓgrid(emu_tt) == collect(2:5000)
+    @test Capse.get_ℓgrid(emu_tt) == collect(2:5000)
+    @test length(Cℓ) == length(Capse.get_ℓgrid(emu_tt))
 end

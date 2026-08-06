@@ -68,7 +68,8 @@ See also: [`get_Cℓ`](@ref), [`get_emulator_description`](@ref), [`CℓEmulator
 function load_emulator(path::String; emu = SimpleChainsEmulator,
     ℓ_file = "l.npy", weights_file = "weights.npy", inminmax_file = "inminmax.npy",
     outminmax_file = "outminmax.npy", nn_setup_file = "nn_setup.json",
-    postprocessing_file = "postprocessing.jl")
+    postprocessing_file = "postprocessing.jl", interpolation = :auto,
+    max_spline_knots::Integer = 2048, endpoint_tolerance::Real = 0.1)
     
     # Ensure path ends with /
     path = endswith(path, "/") ? path : path * "/"
@@ -83,7 +84,10 @@ function load_emulator(path::String; emu = SimpleChainsEmulator,
         ℓgrid = ℓ,
         InMinMax = npzread(path*inminmax_file),
         OutMinMax = npzread(path*outminmax_file),
-        Postprocessing = include(path*postprocessing_file)
+        Postprocessing = include(path*postprocessing_file),
+        interpolation = interpolation,
+        max_spline_knots = max_spline_knots,
+        endpoint_tolerance = endpoint_tolerance,
     )
     return Cℓ_emu
 end

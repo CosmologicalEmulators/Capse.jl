@@ -51,9 +51,13 @@ params = [0.02237, 0.1200, 0.6736, 0.9649, 0.0544, 2.042e-9]
 # Compute power spectrum in microseconds!
 Cℓ = Capse.get_Cℓ(params, Cℓ_emu)
 
-# Get the ℓ-grid
-ℓ_values = Capse.get_ℓgrid(Cℓ_emu)
+# get_Cℓ transparently interpolates subsampled emulators when appropriate.
+ℓ_values = Capse.get_ℓgrid(Cℓ_emu)          # Always matches Cℓ
+ℓ_training = Capse.get_training_ℓgrid(Cℓ_emu)
 ```
+
+For automatically interpolated grids, source bounds within `0.1` of an integer
+are snapped to that integer. Bounds farther away are moved inward.
 
 ## 📊 Performance Benchmarks
 

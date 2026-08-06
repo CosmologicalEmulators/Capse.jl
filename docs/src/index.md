@@ -50,6 +50,20 @@ Cℓ = Capse.get_Cℓ(params, Cℓ_emu)
 
 `Capse.jl` supports rapid and exact interpolation between the emulator's natively trained `ℓgrid` and an arbitrary user-defined `ℓgrid` via precomputed FFT plans using Chebyshev polynomials.
 
+For emulators trained on a subsampled multipole grid, loading prepares a
+`SplinePlan` backed by a cubic spline. Interpolation is transparent:
+
+```julia
+Cℓ = Capse.get_Cℓ(params, Cℓ_emu)
+ℓ = Capse.get_ℓgrid(Cℓ_emu)                 # Grid matching Cℓ
+ℓ_training = Capse.get_training_ℓgrid(Cℓ_emu)
+```
+
+Grids that are already dense or contain more than 2048 training knots use
+identity interpolation. Smaller subsampled grids use cubic interpolation by
+default. Source bounds within 0.1 of an integer are snapped to that integer;
+other bounds are moved inward to avoid extrapolation.
+
 ```@docs
 Capse.ChebyshevInterpolPlan
 Capse.prepare_Cℓ_interpolation

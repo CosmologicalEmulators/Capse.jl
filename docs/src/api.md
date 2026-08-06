@@ -65,6 +65,17 @@ params_batch = rand(6, 100)  # 100 different cosmologies
 Cℓ_batch = Capse.get_Cℓ(params_batch, Cℓ_emu)
 ```
 
+### Automatic spline interpolation
+
+```@docs
+Capse.SplinePlan
+Capse.get_training_ℓgrid
+```
+
+`get_Cℓ` applies the interpolation method selected while loading. `get_ℓgrid`
+always returns the grid matching the prediction, while `get_training_ℓgrid`
+returns the original emulator output knots.
+
 ### `get_ℓgrid`
 
 ```@docs

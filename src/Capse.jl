@@ -1,6 +1,5 @@
 module Capse
 
-using Base: @kwdef
 using Adapt
 using AbstractCosmologicalEmulators
 import AbstractCosmologicalEmulators: get_emulator_description
@@ -8,8 +7,8 @@ import JSON: parsefile
 import NPZ: npzread
 using Artifacts
 
-export get_Cℓ
-export ChebyshevInterpolPlan, prepare_Cℓ_interpolation, interp_Cℓ
+export get_Cℓ, get_ℓgrid, get_training_ℓgrid
+export SplinePlan, ChebyshevInterpolPlan, prepare_Cℓ_interpolation, interp_Cℓ
 
 include("types.jl")
 include("interpolation.jl")

@@ -1,6 +1,6 @@
 name = "Capse"
 uuid = "994f66c3-d2c7-4ba6-88fb-4a10f50800ba"
-version = "0.4.1"
+version = "0.5.0"
 authors = ["Marco Bonici <bonici.marco@gmail.com>"]
 
 [deps]

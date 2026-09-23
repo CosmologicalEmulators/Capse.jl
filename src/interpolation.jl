@@ -91,6 +91,16 @@ function SplinePlan(
     )
 end
 
+"""
+    prepare_interpolation_method(ℓgrid; interpolation=:auto,
+                                max_spline_knots=2048,
+                                endpoint_tolerance=0.1)
+
+Select an interpolation method for a training multipole grid. `:auto` keeps
+dense grids and grids larger than `max_spline_knots` unchanged, and prepares a
+cubic spline for smaller subsampled grids. `:none` disables interpolation and
+`:cubic` forces a spline plan.
+"""
 function prepare_interpolation_method(
     ℓgrid::AbstractVector;
     interpolation=:auto,
@@ -130,4 +140,10 @@ function (plan::SplinePlan)(values::AbstractMatrix)
     return plan.Plan(ordered_values)
 end
 
+"""
+    interp_Cℓ(values, plan::SplinePlan)
+
+Interpolate a spectrum vector or a matrix of spectra from `plan`'s training
+grid onto its dense integer prediction grid.
+"""
 interp_Cℓ(values::Union{AbstractVector, AbstractMatrix}, plan::SplinePlan) = plan(values)

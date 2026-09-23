@@ -31,6 +31,30 @@ function get_emulator_description(Cℓemu::AbstractCℓEmulators)
     return nothing
 end
 
+function _postprocessing_name(NN_dict, explicit_name)
+    !isnothing(explicit_name) && return explicit_name
+    haskey(NN_dict, "postprocessing_name") && return NN_dict["postprocessing_name"]
+    return get(get(NN_dict, "emulator_description", Dict()), "postprocessing_name", nothing)
+end
+
+function _postprocessing_index(NN_dict, name::String, explicit_index)
+    description = get(NN_dict, "emulator_description", Dict())
+    index = isnothing(explicit_index) ?
+        get(NN_dict, name, get(description, name, nothing)) : explicit_index
+    (index isa Integer && !(index isa Bool) && 1 <= index <= NN_dict["n_input_features"]) ||
+        throw(ArgumentError("$(name) must be a one-based input index between 1 and $(NN_dict["n_input_features"])"))
+    return Int(index)
+end
+
+function _load_bundled_emulator(artifact_root::AbstractString, spectrum::AbstractString)
+    path = joinpath(artifact_root, spectrum)
+    nn_setup = parsefile(joinpath(path, "nn_setup.json"))
+    postprocessing_name = _postprocessing_name(nn_setup, nothing)
+    isnothing(postprocessing_name) &&
+        throw(ArgumentError("Bundled $(spectrum) emulator must name its postprocessor"))
+    return load_emulator(path; postprocessing_name)
+end
+
 """
     load_emulator(path::String; kwargs...) -> CℓEmulator
 
@@ -52,7 +76,14 @@ Load a pre-trained CMB power spectrum emulator from disk.
 - `postprocessing_name`: Registered postprocessing name. Overrides artifact metadata;
   when neither is provided, load `postprocessing_file` as before.
 - `ln10As_index`, `tau_index`: One-based input parameter positions for a named
-  postprocessor. Explicit keywords override values in `nn_setup.json`.
+  postprocessor. Explicit keywords override values in `nn_setup.json`. These
+  indices do not apply to legacy file-based postprocessing.
+
+When metadata names a registered postprocessor, it is used automatically. If
+there is no name, `postprocessing_file` is included in the Capse module. Passing
+`postprocessing_name=nothing` does not force file-based loading when metadata
+contains a name. The legacy path is retained for old files, but dynamic `include`
+can have Julia world-age limitations when loading and evaluating in one call.
 
 # Returns
 - `CℓEmulator`: Loaded emulator ready for inference
@@ -69,15 +100,6 @@ emulator = load_emulator("/path/to/weights/", emu=LuxEmulator)
 
 See also: [`get_Cℓ`](@ref), [`get_emulator_description`](@ref), [`CℓEmulator`](@ref)
 """
-function _postprocessing_index(NN_dict, name::String, explicit_index)
-    description = get(NN_dict, "emulator_description", Dict())
-    index = isnothing(explicit_index) ?
-        get(NN_dict, name, get(description, name, nothing)) : explicit_index
-    (index isa Integer && !(index isa Bool) && 1 <= index <= NN_dict["n_input_features"]) ||
-        throw(ArgumentError("$(name) must be a one-based input index between 1 and $(NN_dict["n_input_features"])"))
-    return Int(index)
-end
-
 function load_emulator(path::String; emu = SimpleChainsEmulator,
     ℓ_file = "l.npy", weights_file = "weights.npy", inminmax_file = "inminmax.npy",
     outminmax_file = "outminmax.npy", nn_setup_file = "nn_setup.json",
@@ -93,13 +115,7 @@ function load_emulator(path::String; emu = SimpleChainsEmulator,
 
     weights = npzread(path*weights_file)
     trained_emu = Capse.init_emulator(NN_dict, weights, emu)
-    name = if !isnothing(postprocessing_name)
-        postprocessing_name
-    elseif haskey(NN_dict, "postprocessing_name")
-        NN_dict["postprocessing_name"]
-    else
-        get(get(NN_dict, "emulator_description", Dict()), "postprocessing_name", nothing)
-    end
+    name = _postprocessing_name(NN_dict, postprocessing_name)
     postprocessing = if isnothing(name)
         include(path*postprocessing_file)
     else

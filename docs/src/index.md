@@ -63,7 +63,6 @@ default. Source bounds within 0.1 of an integer are snapped to that integer;
 other bounds are moved inward to avoid extrapolation.
 
 ```@docs
-Capse.SplinePlan
 Capse.prepare_interpolation_method
 Capse.interp_Cℓ
 ```
@@ -90,7 +89,8 @@ The weights folder should contain:
 - `inminmax.npy`: Input normalization parameters
 - `outminmax.npy`: Output normalization parameters
 - `nn_setup.json`: Network architecture description
-- `postprocessing.jl`: Post-processing function
+- Either a registered `postprocessing_name` in `nn_setup.json`, or a legacy
+  `postprocessing.jl` function
 
 #### Published CAMB Mnu-w0-wa-CDM models
 
@@ -109,9 +109,12 @@ Dℓ_TT = Capse.get_Cℓ(params, tt)
 
 These models return lensed `Dℓ = ℓ(ℓ+1)Cℓ/(2π)` in μK² for the CMB spectra,
 despite the `get_Cℓ` method name. PP returns
-`[ℓ(ℓ+1)]² Cℓᵠᵠ/(2π)` (dimensionless). The artifact retains a legacy
-`postprocessing.jl` file, but its named postprocessors support immediate
-load/evaluation and AD without Julia world-age dispatch.
+`[ℓ(ℓ+1)]² Cℓᵠᵠ/(2π)` (dimensionless). Bundled emulators always use their
+registered named postprocessors. The legacy `postprocessing.jl` file is retained
+inside the Zenodo archive for provenance; it is not a selectable fallback for
+the bundled models. For user-supplied legacy folders without a postprocessing
+name, `load_emulator` still loads the Julia file, with the usual world-age
+limitation when loading and evaluating in one call.
 
 ### Understanding Parameters
 

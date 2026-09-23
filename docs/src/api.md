@@ -12,12 +12,8 @@ Capse.CℓEmulator
 
 The main struct for CMB power spectrum emulation. Contains the trained neural network, normalization parameters, and post-processing functions.
 
-**Fields:**
-- `TrainedEmulator::AbstractTrainedEmulators`: The trained neural network model
-- `ℓgrid::AbstractVector`: Multipole moments (ℓ values) for the power spectrum
-- `InMinMax::AbstractMatrix`: Min-max normalization parameters for inputs (2×n_params matrix)
-- `OutMinMax::AbstractMatrix`: Min-max normalization parameters for outputs (2×n_ℓ matrix)
-- `Postprocessing::Function`: Post-processing function applied to network output
+The concrete field types are parameters of `CℓEmulator`. In particular,
+`Postprocessing` is a callable object and is not required to subtype `Function`.
 
 **Example:**
 ```julia
@@ -149,6 +145,8 @@ Loads a pre-trained emulator from disk.
 - `outminmax_file`: Filename for output normalization (default: `"outminmax.npy"`)
 - `nn_setup_file`: Filename for network configuration (default: `"nn_setup.json"`)
 - `postprocessing_file`: Filename for post-processing function (default: `"postprocessing.jl"`)
+- `postprocessing_name`: Registered postprocessor; overrides the name in metadata.
+- `ln10As_index`, `tau_index`: One-based input indices for named postprocessing.
 
 **Returns:**
 - `CℓEmulator`: Loaded emulator ready for inference
@@ -159,7 +157,8 @@ The specified directory must contain:
 2. ℓ-grid specification (`.npy` format)
 3. Normalization parameters (`.npy` format)
 4. Network architecture description (`.json` format)
-5. Post-processing function (`.jl` format)
+5. Either a registered `postprocessing_name` in `nn_setup.json`, or a legacy
+   Julia post-processing function (`.jl` format)
 
 **Example:**
 ```julia
@@ -178,6 +177,12 @@ Cℓ_emu = Capse.load_emulator(
 ```
 
 ## Backend Types
+
+### Built-in named postprocessing
+
+```@docs
+Capse.AsPostprocessing
+```
 
 ### `SimpleChainsEmulator`
 

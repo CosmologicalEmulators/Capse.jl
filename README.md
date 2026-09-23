@@ -79,6 +79,24 @@ PP returns `[ℓ(ℓ+1)]² Cℓᵠᵠ/(2π)` (dimensionless). For Mooncake rever
 inference, load the desired component from the installed artifact with
 `emu=Capse.LuxEmulator` rather than the default SimpleChains backend.
 
+Resolve the artifact through Capse's manifest. Calling `Capse.artifact"..."`
+from `Main` searches for an artifact manifest belonging to `Main`, not Capse:
+
+```julia
+using Artifacts, Capse
+
+manifest = joinpath(pkgdir(Capse), "Artifacts.toml")
+tree = artifact_hash("CAMB_MNUW0WACDM", manifest)
+isnothing(tree) && error("CAMB_MNUW0WACDM artifact is not bound")
+tt = Capse.load_emulator(joinpath(artifact_path(tree), "TT"); emu=Capse.LuxEmulator)
+```
+
+Bundled models always use their registered `postprocessing_name`. The archived
+`postprocessing.jl` files are retained for provenance, not as a selectable
+fallback. For user-supplied legacy directories without a named postprocessor,
+`load_emulator` still includes the Julia file; `ln10As_index` and `tau_index`
+apply only to named postprocessing.
+
 ## 📊 Performance Benchmarks
 
 <div align="center">

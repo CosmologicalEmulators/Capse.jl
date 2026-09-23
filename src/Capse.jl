@@ -17,12 +17,16 @@ include("postprocessing.jl")
 include("utils.jl")
 
 function __init__()
-    global trained_emulators = Dict()
-    trained_emulators["CAMB_MNUW0WACDM"] = Dict()
-    for spectrum in ("TT", "TE", "EE", "BB", "PP")
-        trained_emulators["CAMB_MNUW0WACDM"][spectrum] =
-            load_emulator(joinpath(artifact"CAMB_MNUW0WACDM", spectrum))
-    end
+    artifact_root = artifact"CAMB_MNUW0WACDM"
+    global trained_emulators = Dict(
+        "CAMB_MNUW0WACDM" => Dict(
+            "TT" => _load_bundled_emulator(artifact_root, "TT"),
+            "TE" => _load_bundled_emulator(artifact_root, "TE"),
+            "EE" => _load_bundled_emulator(artifact_root, "EE"),
+            "BB" => _load_bundled_emulator(artifact_root, "BB"),
+            "PP" => _load_bundled_emulator(artifact_root, "PP"),
+        ),
+    )
 end
 
 end # module

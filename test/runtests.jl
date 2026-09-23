@@ -21,10 +21,14 @@ mlpd = SimpleChain(
 weights = SimpleChains.init_params(mlpd)
 inminmax = rand(6, 2)
 outminmax = rand(40, 2)
-npzwrite("emu/l.npy", ℓ_test)
-npzwrite("emu/weights.npy", weights)
-npzwrite("emu/inminmax.npy", inminmax)
-npzwrite("emu/outminmax.npy", outminmax)
+const test_emu_dir = mktempdir()
+atexit(() -> rm(test_emu_dir; recursive=true, force=true))
+npzwrite(joinpath(test_emu_dir, "l.npy"), ℓ_test)
+npzwrite(joinpath(test_emu_dir, "weights.npy"), weights)
+npzwrite(joinpath(test_emu_dir, "inminmax.npy"), inminmax)
+npzwrite(joinpath(test_emu_dir, "outminmax.npy"), outminmax)
+cp(joinpath(@__DIR__, "emu", "nn_setup.json"), joinpath(test_emu_dir, "nn_setup.json"))
+cp(joinpath(@__DIR__, "emu", "postprocessing.jl"), joinpath(test_emu_dir, "postprocessing.jl"))
 emu = Capse.SimpleChainsEmulator(Architecture=mlpd, Weights=weights)
 
 postprocessing(input, output, Cℓemu) = output .* exp(input[1] - 3)
@@ -36,7 +40,7 @@ capse_emu = Capse.CℓEmulator(
     OutMinMax=outminmax,
     Postprocessing=postprocessing,
 )
-capse_loaded_emu = Capse.load_emulator("emu/")
+capse_loaded_emu = Capse.load_emulator(test_emu_dir)
 
 @testset "Capse predictions" begin
     cosmo = ones(6)
@@ -57,8 +61,8 @@ end
     @test !(capse_loaded_emu.Postprocessing isa Capse.AsPostprocessing)
 
     mktempdir() do dir
-        for filename in ("l.npy", "weights.npy", "inminmax.npy", "outminmax.npy")
-            cp(joinpath(@__DIR__, "emu", filename), joinpath(dir, filename))
+        for filename in ("l.npy", "weights.npy", "inminmax.npy", "outminmax.npy", "nn_setup.json")
+            cp(joinpath(test_emu_dir, filename), joinpath(dir, filename))
         end
         configuration = read(joinpath(@__DIR__, "emu", "nn_setup.json"), String)
         configuration = replace(configuration, "\"n_input_features\": 6," =>

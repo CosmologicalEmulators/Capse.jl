@@ -7,14 +7,14 @@ abstract type AbstractCℓEmulators end
 Main struct for CMB angular power spectrum emulation.
 
 # Fields
-- `TrainedEmulator::AbstractTrainedEmulators`: Trained neural network model
-- `ℓgrid::AbstractVector`: Constructor keyword containing the training multipoles
-- `InMinMax::AbstractMatrix`: Min-max normalization parameters for inputs (2×n_params)
-- `OutMinMax::AbstractMatrix`: Min-max normalization parameters for outputs (2×n_ℓ)
-- `Postprocessing::Function`: Post-processing function with signature `f(input, output, emulator)`
-- `TrainingℓGrid`: Multipoles used while training the emulator
-- `PredictionℓGrid`: Multipoles returned by `get_Cℓ`
-- `InterpolationMethod`: Identity or cubic interpolation applied after postprocessing
+- `TrainedEmulator::TE`: Trained neural network model
+- `TrainingℓGrid::LT`: Multipoles used while training the emulator
+- `PredictionℓGrid::LP`: Multipoles returned by `get_Cℓ`
+- `InMinMax::I`: Min-max normalization parameters for inputs
+- `OutMinMax::O`: Min-max normalization parameters for outputs
+- `Postprocessing::P`: Callable post-processing object with signature
+  `f(input, output, emulator)`; it need not subtype `Function`.
+- `InterpolationMethod::S`: Identity or cubic interpolation applied after postprocessing
 
 # Example
 ```julia

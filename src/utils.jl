@@ -49,6 +49,10 @@ Load a pre-trained CMB power spectrum emulator from disk.
 - `outminmax_file::String = "outminmax.npy"`: Filename for output normalization
 - `nn_setup_file::String = "nn_setup.json"`: Filename for network architecture
 - `postprocessing_file::String = "postprocessing.jl"`: Filename for post-processing function
+- `postprocessing_name`: Registered postprocessing name. Overrides artifact metadata;
+  when neither is provided, load `postprocessing_file` as before.
+- `ln10As_index`, `tau_index`: One-based input parameter positions for a named
+  postprocessor. Explicit keywords override values in `nn_setup.json`.
 
 # Returns
 - `CℓEmulator`: Loaded emulator ready for inference
@@ -65,10 +69,20 @@ emulator = load_emulator("/path/to/weights/", emu=LuxEmulator)
 
 See also: [`get_Cℓ`](@ref), [`get_emulator_description`](@ref), [`CℓEmulator`](@ref)
 """
+function _postprocessing_index(NN_dict, name::String, explicit_index)
+    description = get(NN_dict, "emulator_description", Dict())
+    index = isnothing(explicit_index) ?
+        get(NN_dict, name, get(description, name, nothing)) : explicit_index
+    (index isa Integer && !(index isa Bool) && 1 <= index <= NN_dict["n_input_features"]) ||
+        throw(ArgumentError("$(name) must be a one-based input index between 1 and $(NN_dict["n_input_features"])"))
+    return Int(index)
+end
+
 function load_emulator(path::String; emu = SimpleChainsEmulator,
     ℓ_file = "l.npy", weights_file = "weights.npy", inminmax_file = "inminmax.npy",
     outminmax_file = "outminmax.npy", nn_setup_file = "nn_setup.json",
-    postprocessing_file = "postprocessing.jl", interpolation = :auto,
+    postprocessing_file = "postprocessing.jl", postprocessing_name = nothing,
+    ln10As_index = nothing, tau_index = nothing, interpolation = :auto,
     max_spline_knots::Integer = 2048, endpoint_tolerance::Real = 0.1)
     
     # Ensure path ends with /
@@ -79,12 +93,32 @@ function load_emulator(path::String; emu = SimpleChainsEmulator,
 
     weights = npzread(path*weights_file)
     trained_emu = Capse.init_emulator(NN_dict, weights, emu)
+    name = if !isnothing(postprocessing_name)
+        postprocessing_name
+    elseif haskey(NN_dict, "postprocessing_name")
+        NN_dict["postprocessing_name"]
+    else
+        get(get(NN_dict, "emulator_description", Dict()), "postprocessing_name", nothing)
+    end
+    postprocessing = if isnothing(name)
+        include(path*postprocessing_file)
+    else
+        name isa Union{Symbol, AbstractString} ||
+            throw(ArgumentError("postprocessing_name must be a string or symbol"))
+        key = String(name)
+        haskey(BUILTIN_POSTPROCESSING, key) ||
+            throw(ArgumentError("Unknown postprocessing_name: $(key)"))
+        as_index = _postprocessing_index(NN_dict, "ln10As_index", ln10As_index)
+        optical_depth_index = key == "as_log" ? 0 :
+            _postprocessing_index(NN_dict, "tau_index", tau_index)
+        BUILTIN_POSTPROCESSING[key](as_index, optical_depth_index)
+    end
     Cℓ_emu = Capse.CℓEmulator(
         TrainedEmulator = trained_emu, 
         ℓgrid = ℓ,
         InMinMax = npzread(path*inminmax_file),
         OutMinMax = npzread(path*outminmax_file),
-        Postprocessing = include(path*postprocessing_file),
+        Postprocessing = postprocessing,
         interpolation = interpolation,
         max_spline_knots = max_spline_knots,
         endpoint_tolerance = endpoint_tolerance,

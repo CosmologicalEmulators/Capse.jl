@@ -70,7 +70,8 @@ Capse.interp_Cℓ
 
 ### Loading Emulators
 
-`Capse.jl` supports loading pre-trained emulators from disk. Trained weights are available on [Zenodo](https://zenodo.org/record/8187935).
+`Capse.jl` supports loading pre-trained emulators from disk. The current bundled
+models are available on [Zenodo](https://doi.org/10.5281/zenodo.22921165).
 
 ```julia
 # Default loading (uses SimpleChains backend)
@@ -90,6 +91,27 @@ The weights folder should contain:
 - `outminmax.npy`: Output normalization parameters
 - `nn_setup.json`: Network architecture description
 - `postprocessing.jl`: Post-processing function
+
+#### Published CAMB Mnu-w0-wa-CDM models
+
+The [five CAMB + CosmoRec emulators](https://doi.org/10.5281/zenodo.22921165)
+are loaded as `Capse.trained_emulators["CAMB_MNUW0WACDM"]` with keys `TT`, `TE`,
+`EE`, `BB`, and `PP`. Inputs are ordered as
+`[ln10As, ns, tau, H0, omega_b, omega_c, Mnu, w0, wa]`, with
+`w0 + wa < -0.5`; exact `Mnu = 0` was not in the training set.
+
+```julia
+params = [3.044, 0.965, 0.054, 67.4, 0.02237, 0.120, 0.06, -1.0, 0.0]
+tt = Capse.trained_emulators["CAMB_MNUW0WACDM"]["TT"]
+Dℓ_TT = Capse.get_Cℓ(params, tt)
+ℓ = Capse.get_ℓgrid(tt)  # 2:9500
+```
+
+These models return lensed `Dℓ = ℓ(ℓ+1)Cℓ/(2π)` in μK² for the CMB spectra,
+despite the `get_Cℓ` method name. PP returns
+`[ℓ(ℓ+1)]² Cℓᵠᵠ/(2π)` (dimensionless). The artifact retains a legacy
+`postprocessing.jl` file, but its named postprocessors support immediate
+load/evaluation and AD without Julia world-age dispatch.
 
 ### Understanding Parameters
 

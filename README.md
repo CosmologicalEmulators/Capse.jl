@@ -59,6 +59,26 @@ Cℓ = Capse.get_Cℓ(params, Cℓ_emu)
 For automatically interpolated grids, source bounds within `0.1` of an integer
 are snapped to that integer. Bounds farther away are moved inward.
 
+### CAMB Mnu-w0-wa-CDM emulators
+
+The five [CAMB + CosmoRec models](https://doi.org/10.5281/zenodo.22921165)
+(`TT`, `TE`, `EE`, `BB`, `PP`) are available in
+`Capse.trained_emulators["CAMB_MNUW0WACDM"]`:
+
+```julia
+params = [3.044, 0.965, 0.054, 67.4, 0.02237, 0.120, 0.06, -1.0, 0.0]
+tt = Capse.trained_emulators["CAMB_MNUW0WACDM"]["TT"]
+Dℓ_TT = Capse.get_Cℓ(params, tt)
+@assert Capse.get_ℓgrid(tt) == collect(2:9500)
+```
+
+The input order is `ln10As, ns, tau, H0, omega_b, omega_c, Mnu, w0, wa`, with
+`w0 + wa < -0.5`. These models were not trained at exactly `Mnu = 0`.
+Despite the method name, the CMB predictions are lensed **Dℓ in μK²**, not Cℓ;
+PP returns `[ℓ(ℓ+1)]² Cℓᵠᵠ/(2π)` (dimensionless). For Mooncake reverse-mode
+inference, load the desired component from the installed artifact with
+`emu=Capse.LuxEmulator` rather than the default SimpleChains backend.
+
 ## 📊 Performance Benchmarks
 
 <div align="center">

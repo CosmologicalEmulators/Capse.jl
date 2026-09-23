@@ -13,15 +13,16 @@ export SplinePlan, prepare_interpolation_method, interp_Cℓ
 include("types.jl")
 include("interpolation.jl")
 include("predict.jl")
+include("postprocessing.jl")
 include("utils.jl")
 
 function __init__()
     global trained_emulators = Dict()
-    trained_emulators["CAMB_LCDM"] = Dict()
-    trained_emulators["CAMB_LCDM"]["TT"] = load_emulator(joinpath(artifact"CAMB_LCDM", "TT/"))
-    trained_emulators["CAMB_LCDM"]["TE"] = load_emulator(joinpath(artifact"CAMB_LCDM", "TE/"))
-    trained_emulators["CAMB_LCDM"]["EE"] = load_emulator(joinpath(artifact"CAMB_LCDM", "EE/"))
-    trained_emulators["CAMB_LCDM"]["PP"] = load_emulator(joinpath(artifact"CAMB_LCDM", "PP/"))
+    trained_emulators["CAMB_MNUW0WACDM"] = Dict()
+    for spectrum in ("TT", "TE", "EE", "BB", "PP")
+        trained_emulators["CAMB_MNUW0WACDM"][spectrum] =
+            load_emulator(joinpath(artifact"CAMB_MNUW0WACDM", spectrum))
+    end
 end
 
 end # module

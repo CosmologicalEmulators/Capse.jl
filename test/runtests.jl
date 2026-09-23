@@ -52,6 +52,62 @@ capse_loaded_emu = Capse.load_emulator("emu/")
     @test Capse.get_Cℓ(cosmo_batch, capse_emu) == Capse.get_Cℓ(cosmo_batch, capse_loaded_emu)
 end
 
+@testset "Named and legacy postprocessing" begin
+    @test capse_loaded_emu.Postprocessing isa Function
+    @test !(capse_loaded_emu.Postprocessing isa Capse.AsPostprocessing)
+
+    mktempdir() do dir
+        for filename in ("l.npy", "weights.npy", "inminmax.npy", "outminmax.npy")
+            cp(joinpath(@__DIR__, "emu", filename), joinpath(dir, filename))
+        end
+        configuration = read(joinpath(@__DIR__, "emu", "nn_setup.json"), String)
+        configuration = replace(configuration, "\"n_input_features\": 6," =>
+            "\"n_input_features\": 6, \"postprocessing_name\": \"as_tau_log\", " *
+            "\"ln10As_index\": 1, \"tau_index\": 3,")
+        write(joinpath(dir, "nn_setup.json"), configuration)
+
+        # No postprocessing.jl exists here. Metadata and explicit names must not load a file.
+        function load_and_predict(path; kwargs...)
+            loaded = Capse.load_emulator(path; kwargs...)
+            return loaded.Postprocessing, Capse.get_Cℓ(ones(6), loaded)
+        end
+        named_function, named_values = load_and_predict(dir)
+        @test named_function isa Capse.AsPostprocessing{true, true}
+        @test named_function.tau_index == 3
+        @test all(isfinite, named_values)
+
+        explicit_function, _ = load_and_predict(dir;
+            postprocessing_name=:as_tau_linear, tau_index=6)
+        @test explicit_function isa Capse.AsPostprocessing{false, true}
+        @test explicit_function.tau_index == 6
+        @test_throws ArgumentError Capse.load_emulator(dir; postprocessing_name=:unknown)
+        @test_throws ArgumentError Capse.load_emulator(dir; tau_index=7)
+
+        nested_configuration = replace(configuration,
+            "\"postprocessing_name\": \"as_tau_log\", \"ln10As_index\": 1, \"tau_index\": 3," => "")
+        nested_configuration = replace(nested_configuration, "\"author\" :" =>
+            "\"postprocessing_name\" : \"as_tau_linear\", " *
+            "\"ln10As_index\" : 1, \"tau_index\" : 6, \"author\" :")
+        write(joinpath(dir, "nn_setup.json"), nested_configuration)
+        nested_function, _ = load_and_predict(dir)
+        @test nested_function isa Capse.AsPostprocessing{false, true}
+        @test nested_function.tau_index == 6
+
+        input = [3.0, 0.96, 0.04, 70.0, 0.12, 0.11]
+        output = [0.2, 0.4]
+        @test nested_function(input, output, nothing) ≈
+            output .* exp(input[1]) .* 1e-10 .* exp(-2 * input[6])
+        @test named_function(input, output, nothing) ≈
+            exp.(output) .* exp(input[1]) .* 1e-10 .* exp(-2 * input[3])
+        input_batch = hcat(input, input .+ [0.1, 0, 0.01, 0, 0, -0.01])
+        output_batch = hcat(output, 2 .* output)
+        @test nested_function(input_batch, output_batch, nothing) ≈
+            output_batch .* reshape(exp.(input_batch[1, :]) .* 1e-10 .* exp.(-2 .* input_batch[6, :]), 1, :)
+        log_only = Capse.postprocessing_as_log(1, 0)
+        @test log_only(input, output, nothing) ≈ exp.(output) .* exp(input[1]) .* 1e-10
+    end
+end
+
 @testset "Dense spline prediction" begin
     ℓ_sparse = [2.0, 3.5, 7.0, 12.0, 20.0]
     ℓ_dense = collect(2:20)
@@ -143,19 +199,4 @@ end
     end
 end
 
-@testset "Bundled Emulators" begin
-    @test haskey(Capse.trained_emulators, "CAMB_LCDM")
-    @test haskey(Capse.trained_emulators["CAMB_LCDM"], "TT")
-
-    emu_tt = Capse.trained_emulators["CAMB_LCDM"]["TT"]
-    @test emu_tt isa Capse.CℓEmulator
-
-    params = [0.022, 0.12, 67.0, 0.96, 0.05, 2.1e-9]
-    Cℓ = Capse.get_Cℓ(params, emu_tt)
-    @test length(Cℓ) > 0
-    @test all(isfinite, Cℓ)
-    @test emu_tt.InterpolationMethod isa Capse.IdentityInterpolation
-    @test Capse.get_training_ℓgrid(emu_tt) == collect(2:5000)
-    @test Capse.get_ℓgrid(emu_tt) == collect(2:5000)
-    @test length(Cℓ) == length(Capse.get_ℓgrid(emu_tt))
-end
+include("published_artifact.jl")

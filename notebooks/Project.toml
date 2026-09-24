@@ -1,7 +1,6 @@
 [deps]
 Capse = "994f66c3-d2c7-4ba6-88fb-4a10f50800ba"
 IJulia = "7073ff75-c697-5162-941a-fcdaad2a7d2a"
-Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PythonCall = "6099a3de-0909-46bc-b1f4-468b9a2dfc0d"
 
 [sources]
@@ -10,5 +9,4 @@ Capse = {path = ".."}
 [compat]
 julia = "1.11"
 IJulia = "1"
-Plots = "1"
 PythonCall = "0.9"

@@ -51,9 +51,54 @@ params = [0.02237, 0.1200, 0.6736, 0.9649, 0.0544, 2.042e-9]
 # Compute power spectrum in microseconds!
 Cℓ = Capse.get_Cℓ(params, Cℓ_emu)
 
-# Get the ℓ-grid
-ℓ_values = Capse.get_ℓgrid(Cℓ_emu)
+# get_Cℓ transparently interpolates subsampled emulators when appropriate.
+ℓ_values = Capse.get_ℓgrid(Cℓ_emu)          # Always matches Cℓ
+ℓ_training = Capse.get_training_ℓgrid(Cℓ_emu)
 ```
+
+For automatically interpolated grids, source bounds within `0.1` of an integer
+are snapped to that integer. Bounds farther away are moved inward.
+
+### CAMB Mnu-w0-wa-CDM emulators
+
+The five [CAMB + CosmoRec models](https://doi.org/10.5281/zenodo.22921165)
+(`TT`, `TE`, `EE`, `BB`, `PP`) are available in
+`Capse.trained_emulators["CAMB_MNUW0WACDM"]`:
+
+```julia
+params = [3.044, 0.965, 0.054, 67.4, 0.02237, 0.120, 0.06, -1.0, 0.0]
+tt = Capse.trained_emulators["CAMB_MNUW0WACDM"]["TT"]
+Dℓ_TT = Capse.get_Cℓ(params, tt)
+@assert Capse.get_ℓgrid(tt) == collect(2:9500)
+```
+
+The input order is `ln10As, ns, tau, H0, omega_b, omega_c, Mnu, w0, wa`, with
+`w0 + wa < -0.5`. These models were not trained at exactly `Mnu = 0`.
+`l.npy` must contain exactly one multipole per neural-network output; loading a
+grid/output length mismatch throws `ArgumentError`. Older artifacts with a
+larger stored grid must correct `l.npy` to their actual output grid before loading.
+Despite the method name, the CMB predictions are lensed **Dℓ in μK²**, not Cℓ;
+PP returns `[ℓ(ℓ+1)]² Cℓᵠᵠ/(2π)` (dimensionless). For Mooncake reverse-mode
+inference, load the desired component from the installed artifact with
+`emu=Capse.LuxEmulator` rather than the default SimpleChains backend.
+
+Resolve the artifact through Capse's manifest. Calling `Capse.artifact"..."`
+from `Main` searches for an artifact manifest belonging to `Main`, not Capse:
+
+```julia
+using Artifacts, Capse
+
+manifest = joinpath(pkgdir(Capse), "Artifacts.toml")
+tree = artifact_hash("CAMB_MNUW0WACDM", manifest)
+isnothing(tree) && error("CAMB_MNUW0WACDM artifact is not bound")
+tt = Capse.load_emulator(joinpath(artifact_path(tree), "TT"); emu=Capse.LuxEmulator)
+```
+
+Bundled models always use their registered `postprocessing_name`. The archived
+`postprocessing.jl` files are retained for provenance, not as a selectable
+fallback. For user-supplied legacy directories without a named postprocessor,
+`load_emulator` still includes the Julia file; `ln10As_index` and `tau_index`
+apply only to named postprocessing.
 
 ## 📊 Performance Benchmarks
 
@@ -104,10 +149,12 @@ Use `Capse.jl` seamlessly from `Python`:
 
 ```python
 import jaxcapse
+import jax.numpy as jnp
 
-# Load and use just like in Julia
-emu = jaxcapse.load_emulator("path/to/weights/")
-cl = jaxcapse.get_cl(params, emu)
+# Access the bundled TT emulator using its nine-parameter input order.
+emu = jaxcapse.trained_emulators["camb_mnuw0wacdm"]["TT"]
+params = jnp.array([3.044, 0.965, 0.054, 67.4, 0.02237, 0.12, 0.06, -1.0, 0.0])
+cl = emu.get_Cl(params)
 ```
 
 ## 📚 Documentation

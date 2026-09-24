@@ -48,18 +48,29 @@ Cℓ = Capse.get_Cℓ(params, Cℓ_emu)
 
 ### Interpolation
 
-`Capse.jl` supports rapid and exact interpolation between the emulator's natively trained `ℓgrid` and an arbitrary user-defined `ℓgrid` via precomputed FFT plans using Chebyshev polynomials.
+For emulators trained on a subsampled multipole grid, loading prepares a
+`SplinePlan` backed by a cubic spline. Interpolation is transparent:
+
+```julia
+Cℓ = Capse.get_Cℓ(params, Cℓ_emu)
+ℓ = Capse.get_ℓgrid(Cℓ_emu)                 # Grid matching Cℓ
+ℓ_training = Capse.get_training_ℓgrid(Cℓ_emu)
+```
+
+Grids that are already dense or contain more than 2048 training knots use
+identity interpolation. Smaller subsampled grids use cubic interpolation by
+default. Source bounds within 0.1 of an integer are snapped to that integer;
+other bounds are moved inward to avoid extrapolation.
 
 ```@docs
-Capse.ChebyshevInterpolPlan
-Capse.prepare_Cℓ_interpolation
-Capse.interp_Cℓ(::AbstractVector, ::Capse.ChebyshevInterpolPlan)
-Capse.interp_Cℓ(::AbstractMatrix, ::Capse.ChebyshevInterpolPlan)
+Capse.prepare_interpolation_method
+Capse.interp_Cℓ
 ```
 
 ### Loading Emulators
 
-`Capse.jl` supports loading pre-trained emulators from disk. Trained weights are available on [Zenodo](https://zenodo.org/record/8187935).
+`Capse.jl` supports loading pre-trained emulators from disk. The current bundled
+models are available on [Zenodo](https://doi.org/10.5281/zenodo.22921165).
 
 ```julia
 # Default loading (uses SimpleChains backend)
@@ -78,7 +89,35 @@ The weights folder should contain:
 - `inminmax.npy`: Input normalization parameters
 - `outminmax.npy`: Output normalization parameters
 - `nn_setup.json`: Network architecture description
-- `postprocessing.jl`: Post-processing function
+- Either a registered `postprocessing_name` in `nn_setup.json`, or a legacy
+  `postprocessing.jl` function
+
+#### Published CAMB Mnu-w0-wa-CDM models
+
+The [five CAMB + CosmoRec emulators](https://doi.org/10.5281/zenodo.22921165)
+are loaded as `Capse.trained_emulators["CAMB_MNUW0WACDM"]` with keys `TT`, `TE`,
+`EE`, `BB`, and `PP`. Inputs are ordered as
+`[ln10As, ns, tau, H0, omega_b, omega_c, Mnu, w0, wa]`, with
+`w0 + wa < -0.5`; exact `Mnu = 0` was not in the training set.
+`l.npy` must contain exactly one multipole per neural-network output; a length
+mismatch throws `ArgumentError`. Older artifacts with a larger stored grid must
+update `l.npy` to the actual output grid before loading.
+
+```julia
+params = [3.044, 0.965, 0.054, 67.4, 0.02237, 0.120, 0.06, -1.0, 0.0]
+tt = Capse.trained_emulators["CAMB_MNUW0WACDM"]["TT"]
+Dℓ_TT = Capse.get_Cℓ(params, tt)
+ℓ = Capse.get_ℓgrid(tt)  # 2:9500
+```
+
+These models return lensed `Dℓ = ℓ(ℓ+1)Cℓ/(2π)` in μK² for the CMB spectra,
+despite the `get_Cℓ` method name. PP returns
+`[ℓ(ℓ+1)]² Cℓᵠᵠ/(2π)` (dimensionless). Bundled emulators always use their
+registered named postprocessors. The legacy `postprocessing.jl` file is retained
+inside the Zenodo archive for provenance; it is not a selectable fallback for
+the bundled models. For user-supplied legacy folders without a postprocessing
+name, `load_emulator` still loads the Julia file, with the usual world-age
+limitation when loading and evaluating in one call.
 
 ### Understanding Parameters
 
@@ -213,14 +252,15 @@ Use Capse.jl from Python via [jaxcapse](https://github.com/CosmologicalEmulators
 
 ```python
 import jaxcapse
+import jax.numpy as jnp
+import numpy as np
 
-# Load emulator
-emu = jaxcapse.load_emulator("path/to/weights/")
+# Access the bundled TT emulator
+emu = jaxcapse.trained_emulators["camb_mnuw0wacdm"]["TT"]
+params = jnp.array([3.044, 0.965, 0.054, 67.4, 0.02237, 0.12, 0.06, -1.0, 0.0])
 
 # Evaluate
-import numpy as np
-params = np.array([0.02237, 0.1200, 0.6736, 0.9649, 0.0544, 2.042e-9])
-cl = jaxcapse.get_cl(params, emu)
+cl = emu.get_Cl(params)
 ```
 
 ## Troubleshooting

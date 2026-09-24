@@ -22,8 +22,8 @@ Main struct for CMB angular power spectrum emulation.
 emulator = CℓEmulator(
     TrainedEmulator = trained_nn,
     ℓgrid = collect(2:2500),
-    InMinMax = [mins max_vals],  # 2×n_params matrix
-    OutMinMax = [mins max_vals],  # 2×n_ℓ matrix
+    InMinMax = [mins max_vals],  # n_params×2 matrix
+    OutMinMax = [mins max_vals],  # n_ℓ×2 matrix
     Postprocessing = (input, output, emu) -> output
 )
 ```

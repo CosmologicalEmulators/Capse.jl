@@ -249,14 +249,15 @@ Use Capse.jl from Python via [jaxcapse](https://github.com/CosmologicalEmulators
 
 ```python
 import jaxcapse
+import jax.numpy as jnp
+import numpy as np
 
-# Load emulator
-emu = jaxcapse.load_emulator("path/to/weights/")
+# Access the bundled TT emulator
+emu = jaxcapse.trained_emulators["camb_mnuw0wacdm"]["TT"]
+params = jnp.array([3.044, 0.965, 0.054, 67.4, 0.02237, 0.12, 0.06, -1.0, 0.0])
 
 # Evaluate
-import numpy as np
-params = np.array([0.02237, 0.1200, 0.6736, 0.9649, 0.0544, 2.042e-9])
-cl = jaxcapse.get_cl(params, emu)
+cl = emu.get_Cl(params)
 ```
 
 ## Troubleshooting

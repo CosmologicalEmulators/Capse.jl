@@ -146,10 +146,12 @@ Use `Capse.jl` seamlessly from `Python`:
 
 ```python
 import jaxcapse
+import jax.numpy as jnp
 
-# Load and use just like in Julia
-emu = jaxcapse.load_emulator("path/to/weights/")
-cl = jaxcapse.get_cl(params, emu)
+# Access the bundled TT emulator using its nine-parameter input order.
+emu = jaxcapse.trained_emulators["camb_mnuw0wacdm"]["TT"]
+params = jnp.array([3.044, 0.965, 0.054, 67.4, 0.02237, 0.12, 0.06, -1.0, 0.0])
+cl = emu.get_Cl(params)
 ```
 
 ## 📚 Documentation

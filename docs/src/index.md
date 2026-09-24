@@ -99,6 +99,9 @@ are loaded as `Capse.trained_emulators["CAMB_MNUW0WACDM"]` with keys `TT`, `TE`,
 `EE`, `BB`, and `PP`. Inputs are ordered as
 `[ln10As, ns, tau, H0, omega_b, omega_c, Mnu, w0, wa]`, with
 `w0 + wa < -0.5`; exact `Mnu = 0` was not in the training set.
+`l.npy` must contain exactly one multipole per neural-network output; a length
+mismatch throws `ArgumentError`. Older artifacts with a larger stored grid must
+update `l.npy` to the actual output grid before loading.
 
 ```julia
 params = [3.044, 0.965, 0.054, 67.4, 0.02237, 0.120, 0.06, -1.0, 0.0]

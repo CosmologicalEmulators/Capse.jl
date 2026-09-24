@@ -74,6 +74,9 @@ Dℓ_TT = Capse.get_Cℓ(params, tt)
 
 The input order is `ln10As, ns, tau, H0, omega_b, omega_c, Mnu, w0, wa`, with
 `w0 + wa < -0.5`. These models were not trained at exactly `Mnu = 0`.
+`l.npy` must contain exactly one multipole per neural-network output; loading a
+grid/output length mismatch throws `ArgumentError`. Older artifacts with a
+larger stored grid must correct `l.npy` to their actual output grid before loading.
 Despite the method name, the CMB predictions are lensed **Dℓ in μK²**, not Cℓ;
 PP returns `[ℓ(ℓ+1)]² Cℓᵠᵠ/(2π)` (dimensionless). For Mooncake reverse-mode
 inference, load the desired component from the installed artifact with

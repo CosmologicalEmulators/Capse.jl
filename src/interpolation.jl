@@ -43,23 +43,11 @@ function _is_dense_integer_grid(ℓgrid::AbstractVector, source_ascending::Bool)
 end
 
 function resolve_training_ℓgrid(ℓgrid::AbstractVector, output_length::Integer)
-    length(ℓgrid) == output_length && return ℓgrid
-
-    # Legacy Capse artifacts stored the complete CAMB grid 0:10050 even though
-    # the network output was explicitly defined on ℓ=2:5000. Preserve that
-    # documented convention without guessing for any other malformed grid.
-    if length(ℓgrid) >= output_length + 2 &&
-       first(ℓgrid) == 0 &&
-       all(diff(ℓgrid) .== 1)
-        @warn "Using the legacy Capse ℓ=2:$(output_length + 1) output grid " *
-              "because l.npy does not match the network output length." maxlog=1
-        return ℓgrid[3:(output_length + 2)]
-    end
-
-    throw(ArgumentError(
+    length(ℓgrid) == output_length || throw(ArgumentError(
         "The multipole grid length ($(length(ℓgrid))) does not match the " *
         "emulator output length ($output_length)",
     ))
+    return ℓgrid
 end
 
 

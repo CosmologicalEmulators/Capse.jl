@@ -115,6 +115,7 @@ function load_emulator(path::String; emu = SimpleChainsEmulator,
 
     weights = npzread(path*weights_file)
     trained_emu = Capse.init_emulator(NN_dict, weights, emu)
+    resolve_training_ℓgrid(ℓ, NN_dict["n_output_features"])
     name = _postprocessing_name(NN_dict, postprocessing_name)
     postprocessing = if isnothing(name)
         include(path*postprocessing_file)

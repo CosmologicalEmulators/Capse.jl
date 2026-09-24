@@ -42,6 +42,21 @@ capse_emu = Capse.CℓEmulator(
 )
 capse_loaded_emu = Capse.load_emulator(test_emu_dir)
 
+@testset "Multipole grid must match network output" begin
+    @test Capse.resolve_training_ℓgrid(ℓ_test, length(ℓ_test)) === ℓ_test
+    @test_throws ArgumentError Capse.resolve_training_ℓgrid(collect(0:12), 4)
+    @test_throws ArgumentError Capse.resolve_training_ℓgrid(collect(0:10050), 4999)
+
+    mktempdir() do dir
+        for filename in ("weights.npy", "inminmax.npy", "outminmax.npy", "nn_setup.json")
+            cp(joinpath(test_emu_dir, filename), joinpath(dir, filename))
+        end
+        npzwrite(joinpath(dir, "l.npy"), collect(0:200))
+        @test_throws ArgumentError Capse.load_emulator(dir;
+            postprocessing_name=:as_log, ln10As_index=1)
+    end
+end
+
 @testset "Capse predictions" begin
     cosmo = ones(6)
     cosmo_batch = ones(6, 6)

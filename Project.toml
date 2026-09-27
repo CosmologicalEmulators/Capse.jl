@@ -1,6 +1,6 @@
 name = "Capse"
 uuid = "994f66c3-d2c7-4ba6-88fb-4a10f50800ba"
-version = "0.4.1"
+version = "0.5.0"
 authors = ["Marco Bonici <bonici.marco@gmail.com>"]
 
 [deps]
@@ -11,7 +11,7 @@ JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 NPZ = "15e1cf62-19b3-5cfa-8e77-841668bca605"
 
 [compat]
-AbstractCosmologicalEmulators = "0.10"
+AbstractCosmologicalEmulators = "0.11.0"
 Adapt = "3, 4"
 Artifacts = "1.10"
 DifferentiationInterface = "0.7.16"

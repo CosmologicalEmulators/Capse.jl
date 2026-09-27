@@ -1,6 +1,6 @@
-[CAMB_LCDM]
-git-tree-sha1 = "f8b98ff916e0bcb01369d30aaff6620f79c84168"
+[CAMB_MNUW0WACDM]
+git-tree-sha1 = "8a6bf3eac4ac27f28aac6c1cfd1ccfeb2f12fa20"
 
-    [[CAMB_LCDM.download]]
-    sha256 = "929dfcc6880cdb0f966a71cc712214110fc3aefa5cbac456399d72af45a3e2d7"
-    url = "https://zenodo.org/records/18856499/files/trained_emu.tar.xz"
+    [[CAMB_MNUW0WACDM.download]]
+    sha256 = "8f4ae21a0214bdf83ee5557b6d8369ed3db729b91f933e4550d6e2c6eb0b5af8"
+    url = "https://zenodo.org/records/22921165/files/camb_mnuw0wacdm_500000_width96_runtime_v1.tar.xz?download=1"

@@ -1,0 +1,33 @@
+{
+    "n_input_features": 6,
+    "layers": {
+        "layer_4": {
+            "n_neurons": 64,
+            "activation_function": "tanh"
+        },
+        "layer_1": {
+            "n_neurons": 64,
+            "activation_function": "tanh"
+        },
+        "layer_5": {
+            "n_neurons": 64,
+            "activation_function": "tanh"
+        },
+        "layer_2": {
+            "n_neurons": 64,
+            "activation_function": "tanh"
+        },
+        "layer_3": {
+            "n_neurons": 64,
+            "activation_function": "tanh"
+        }
+    },
+    "n_output_features": 4999,
+    "n_hidden_layers": 5,
+    "emulator_description": {
+        "author" : "Marco Bonici",
+        "author_email" : "bonici.marco@gmail.com",
+        "miscellanea" : "The emulator has been trained on the high-precision-settings prediction as computed by the CAMB Boltzmann solver.",
+        "parameters" : "ln10As, ns, H0, ωb, ωc, τ"
+    }
+}
